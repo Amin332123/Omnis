@@ -1,0 +1,69 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--color-background-val, #ffffff);
+  --color-secondary: var(--color-secondary-val, #F8F9FB);
+  --color-foreground: var(--color-foreground-val, #111827);
+  --color-border: var(--color-border-val, #E5E7EB);
+  --color-accent: var(--color-accent-val, #4f46e5);
+  --color-accent-foreground: var(--color-accent-fg-val, #ffffff);
+  --color-muted: var(--color-muted-val, #6B7280);
+  --color-card: var(--color-card-val, #ffffff);
+  --color-card-hover: var(--color-card-hover-val, #F8F9FB);
+
+  --color-sidebar: var(--color-sidebar-val, #ffffff);
+  --color-sidebar-foreground: var(--color-sidebar-fg-val, #111827);
+  --color-sidebar-border: var(--color-sidebar-border-val, #E5E7EB);
+  --color-sidebar-accent: var(--color-sidebar-accent-val, #4f46e5);
+  --color-sidebar-accent-foreground: var(--color-sidebar-accent-fg-val, #ffffff);
+  --color-sidebar-hover: var(--color-sidebar-hover-val, #F8F9FB);
+
+  --color-success: var(--color-success-val, #10B981);
+  --color-warning: var(--color-warning-val, #F59E0B);
+  --color-error: var(--color-error-val, #EF4444);
+
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+}
+
+.dark {
+  --color-background-val: #09090B;
+  --color-secondary-val: #18181B;
+  --color-foreground-val: #FAFAFA;
+  --color-border-val: #27272A;
+  --color-accent-val: #6366f1;
+  --color-accent-fg-val: #ffffff;
+  --color-muted-val: #A1A1AA;
+  --color-card-val: #18181B;
+  --color-card-hover-val: #27272A;
+
+  --color-sidebar-val: #09090B;
+  --color-sidebar-fg-val: #FAFAFA;
+  --color-sidebar-border-val: #27272A;
+  --color-sidebar-accent-val: #6366f1;
+  --color-sidebar-accent-fg-val: #ffffff;
+  --color-sidebar-hover-val: #18181B;
+
+  --color-success-val: #10B981;
+  --color-warning-val: #F59E0B;
+  --color-error-val: #EF4444;
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+}

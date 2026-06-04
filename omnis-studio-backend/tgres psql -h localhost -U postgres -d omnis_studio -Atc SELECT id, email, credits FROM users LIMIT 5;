@@ -1,0 +1,9 @@
+                  id                  |             email              | credits 
+--------------------------------------+--------------------------------+---------
+ 7514eb86-41dc-482b-8b83-a8e013b417eb | qosuwa@mailinator.com          |      10
+ 9c3a9876-5af9-4cc4-871e-6a1e777eafb3 | test@test.com                  |      10
+ bb53cb6b-c2c4-4b8a-9ef9-6af591987bce | test_1780334239848@example.com |      10
+ 0feec90f-9984-427b-b4b9-d65b920ac91d | test_1780334281931@example.com |      10
+ 9f159680-f023-47ff-82a6-93aa0b844667 | test_1780334314172@example.com |      10
+(5 rows)
+

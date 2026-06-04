@@ -1,0 +1,35 @@
+import { ValidationPipe } from "@nestjs/common";
+import { NestFactory } from "@nestjs/core";
+import { NestExpressApplication } from "@nestjs/platform-express";
+import { AppModule } from "./app.module.js";
+import { join } from "path";
+
+async function bootstrap() {
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const localOrigins = [
+    "http://localhost:3000",
+    "http://localhost:3001",
+    "http://localhost:4002",
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:3001",
+    "http://127.0.0.1:4002",
+  ];
+
+  app.enableCors({
+    origin: localOrigins,
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  });
+  app.useStaticAssets(join(process.cwd(), "public"));
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      transform: true,
+    }),
+  );
+  const port = process.env.PORT ?? 4000;
+  await app.listen(port, "127.0.0.1");
+  console.log(`Omnis-Studio API running on http://localhost:${port}`);
+}
+bootstrap();

@@ -1,0 +1,69 @@
+generator client {
+  provider             = "prisma-client"
+  output               = "../src/generated/prisma"
+  importFileExtension  = "js"
+  moduleFormat         = "esm"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Plan {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String
+  credits   Int
+  price     Float
+  features  Json     @default("[]")
+  popular   Boolean  @default(false)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("plans")
+}
+
+model VerificationCode {
+  id           String   @id @default(uuid()) @db.Uuid
+  email        String
+  code         String
+  passwordHash String   @map("password_hash")
+  expiresAt    DateTime @map("expires_at")
+  used         Boolean  @default(false)
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@map("verification_codes")
+}
+
+model User {
+  id        String   @id @default(uuid()) @db.Uuid
+  email     String   @unique
+  passwordHash String @map("password_hash")
+  credits   Float    @default(5)
+  avatarUrl String?  @map("avatar_url")
+  emailNotifications Boolean @default(true) @map("email_notifications")
+  marketingEmails Boolean @default(false) @map("marketing_emails")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  jobs GenerationJob[]
+
+  @@map("users")
+}
+
+model GenerationJob {
+  id          String   @id @default(uuid()) @db.Uuid
+  userId      String   @db.Uuid @map("user_id")
+  type        String
+  prompt      String
+  model       String
+  creditsUsed Float    @map("credits_used")
+  status      String
+  imageUrl    String?  @map("output_url")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("generation_jobs")
+}

@@ -12,15 +12,14 @@ export class ApiError extends Error {
   }
 }
 
-const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL
-
-if (!apiBaseUrl) {
-  throw new Error("NEXT_PUBLIC_API_URL is not set")
+const getApiBaseUrl = () => {
+  const url = process.env.NEXT_PUBLIC_API_URL
+  if (!url) {
+    throw new Error("NEXT_PUBLIC_API_URL is not set")
+  }
+  return url.replace(/\/$/, "")
 }
 
-const apiBaseUrlSafe: string = apiBaseUrl
-
-const normalizeBaseUrl = (base: string) => base.replace(/\/$/, "")
 const normalizePath = (path: string) => (path.startsWith("/") ? path : `/${path}`)
 
 export const getStoredToken = () => {
@@ -69,7 +68,7 @@ export const getApiErrorMessage = (error: unknown, fallback = "Something went wr
 }
 
 export async function apiFetch<T>(path: string, options: ApiRequestOptions = {}) {
-  const url = `${normalizeBaseUrl(apiBaseUrlSafe)}${normalizePath(path)}`
+  const url = `${getApiBaseUrl()}${normalizePath(path)}`
   const headers = new Headers(options.headers)
 
   if (!headers.has("Content-Type") && options.body !== undefined) {

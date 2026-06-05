@@ -7,7 +7,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-}
+ }
 
 model Plan {
   id        String   @id @default(uuid()) @db.Uuid

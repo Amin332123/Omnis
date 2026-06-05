@@ -6,17 +6,22 @@ import { join } from "path";
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
-  const localOrigins = [
+  const defaultOrigins = [
     "http://localhost:3000",
     "http://localhost:3001",
     "http://localhost:4002",
     "http://127.0.0.1:3000",
     "http://127.0.0.1:3001",
     "http://127.0.0.1:4002",
+    "https://omnis-gray-omega.vercel.app",
   ];
 
+  const corsOrigins = process.env.CORS_ORIGINS
+    ? process.env.CORS_ORIGINS.split(",")
+    : defaultOrigins;
+
   app.enableCors({
-    origin: localOrigins,
+    origin: corsOrigins,
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],

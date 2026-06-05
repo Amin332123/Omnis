@@ -28,8 +28,8 @@ async function bootstrap() {
       transform: true,
     }),
   );
-  const port = process.env.PORT ?? 4000;
-  await app.listen(port, "127.0.0.1");
+  const port = process.env.PORT || 3000;
+  await app.listen(port, '0.0.0.0');
   console.log(`Omnis-Studio API running on http://localhost:${port}`);
 }
 bootstrap();

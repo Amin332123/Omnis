@@ -19,6 +19,7 @@ import { CreatePlanDto } from "../plans/dto/create-plan.dto.js";
 import { UpdatePlanDto } from "../plans/dto/update-plan.dto.js";
 import { UpdateUserCreditsDto } from "./dto/update-user-credits.dto.js";
 import { UpdateUserPasswordDto } from "./dto/update-user-password.dto.js";
+import { ListAllGenerationsDto } from "./dto/list-all-generations.dto.js";
 
 @ApiTags("admin")
 @ApiBearerAuth()
@@ -114,5 +115,24 @@ export class AdminController {
   @ApiParam({ name: "id", type: String })
   deletePlan(@Param("id") id: string) {
     return this.plansService.remove(id);
+  }
+
+  @Get("generations")
+  @ApiOperation({ summary: "List all generations across all users with filtering" })
+  @ApiQuery({ name: "type", required: false, enum: ["image", "video"] })
+  @ApiQuery({ name: "status", required: false, enum: ["completed", "processing", "failed"] })
+  @ApiQuery({ name: "search", required: false, type: String, example: "cat" })
+  @ApiQuery({ name: "page", required: false, type: Number, example: 1 })
+  @ApiQuery({ name: "pageSize", required: false, type: Number, example: 20 })
+  @ApiQuery({ name: "userId", required: false, type: String })
+  listAllGenerations(@Query() dto: ListAllGenerationsDto) {
+    return this.adminService.listAllGenerations({
+      type: dto.type,
+      status: dto.status,
+      search: dto.search,
+      page: dto.page ?? 1,
+      pageSize: dto.pageSize ?? 20,
+      userId: dto.userId,
+    });
   }
 }

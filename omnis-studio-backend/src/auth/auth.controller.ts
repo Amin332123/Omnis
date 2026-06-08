@@ -34,6 +34,8 @@ import { LoginDto } from "./dto/login.dto.js";
 import { RegisterDto } from "./dto/register.dto.js";
 import { SendVerificationCodeDto } from "./dto/send-verification-code.dto.js";
 import { VerifyCodeDto } from "./dto/verify-code.dto.js";
+import { RequestPasswordResetDto } from "./dto/request-password-reset.dto.js";
+import { ResetPasswordDto } from "./dto/reset-password.dto.js";
 
 const AVATAR_MAX_SIZE = 5 * 1024 * 1024; // 5MB
 
@@ -96,6 +98,26 @@ export class AuthController {
   @ApiBadRequestResponse({ description: "Invalid or expired code" })
   verifyAndRegister(@Body() dto: VerifyCodeDto) {
     return this.authService.verifyAndRegister(dto);
+  }
+
+  @Post("request-password-reset")
+  @HttpCode(200)
+  @ApiOperation({ summary: "Send a password reset code if the account exists" })
+  @ApiBody({ type: RequestPasswordResetDto })
+  @ApiOkResponse({ description: "Password reset request accepted." })
+  @ApiBadRequestResponse({ description: "Validation errors" })
+  requestPasswordReset(@Body() dto: RequestPasswordResetDto) {
+    return this.authService.requestPasswordReset(dto);
+  }
+
+  @Post("reset-password")
+  @HttpCode(200)
+  @ApiOperation({ summary: "Reset password using a verification code" })
+  @ApiBody({ type: ResetPasswordDto })
+  @ApiOkResponse({ description: "Password reset successfully." })
+  @ApiBadRequestResponse({ description: "Invalid or expired reset code" })
+  resetPassword(@Body() dto: ResetPasswordDto) {
+    return this.authService.resetPassword(dto);
   }
 
   @Post("login")

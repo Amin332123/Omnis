@@ -10,6 +10,7 @@ import {
   Settings,
   Shield,
   Package,
+  GalleryVerticalEnd,
   ChevronLeft,
   ChevronRight,
   X,
@@ -42,6 +43,7 @@ export function Sidebar({ isCollapsed, onToggle, isMobileOpen, onMobileToggle }:
     ...(user?.isAdmin
       ? [
           { label: "Plans", href: "/dashboard/plans", icon: Package },
+          { label: "Media Gallery", href: "/dashboard/admin/media", icon: GalleryVerticalEnd },
           { label: "Admin", href: "/dashboard/admin", icon: Shield },
         ]
       : []),

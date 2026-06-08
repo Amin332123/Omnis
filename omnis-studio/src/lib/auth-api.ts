@@ -41,6 +41,16 @@ export type VerifyCodePayload = {
   code: string
 }
 
+export type RequestPasswordResetPayload = {
+  email: string
+}
+
+export type ResetPasswordPayload = {
+  email: string
+  code: string
+  password: string
+}
+
 export const login = (payload: LoginPayload) =>
   apiFetch<LoginResponse>("/auth/login", {
     method: "POST",
@@ -64,6 +74,20 @@ export const sendVerificationCode = (payload: SendVerificationCodePayload) =>
 
 export const verifyAndRegister = (payload: VerifyCodePayload) =>
   apiFetch<LoginResponse>("/auth/verify-and-register", {
+    method: "POST",
+    body: payload,
+    auth: false,
+  })
+
+export const requestPasswordReset = (payload: RequestPasswordResetPayload) =>
+  apiFetch<{ success: boolean }>("/auth/request-password-reset", {
+    method: "POST",
+    body: payload,
+    auth: false,
+  })
+
+export const resetPassword = (payload: ResetPasswordPayload) =>
+  apiFetch<{ success: boolean }>("/auth/reset-password", {
     method: "POST",
     body: payload,
     auth: false,

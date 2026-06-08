@@ -94,3 +94,45 @@ export const getCreditsUsageSeries = (days: number) =>
 
 export const getNewUsersSeries = (days: number) =>
   apiFetch<NewUsersSeriesResponse>(`/admin/charts/new-users?days=${encodeURIComponent(days)}`)
+
+export type AdminGeneration = {
+  id: string
+  type: "image" | "video"
+  prompt: string
+  model: string
+  creditsUsed: number
+  status: "completed" | "processing" | "failed"
+  imageUrl: string | null
+  createdAt: string
+  user: {
+    id: string
+    email: string
+  }
+}
+
+export type AdminGenerationsListResponse = {
+  page: number
+  pageSize: number
+  total: number
+  generations: AdminGeneration[]
+}
+
+export type ListAllGenerationsParams = {
+  type?: "image" | "video"
+  status?: "completed" | "processing" | "failed"
+  search?: string
+  page?: number
+  pageSize?: number
+  userId?: string
+}
+
+export const getAdminGenerations = (params: ListAllGenerationsParams) => {
+  const q = new URLSearchParams()
+  if (params.type) q.set("type", params.type)
+  if (params.status) q.set("status", params.status)
+  if (params.search) q.set("search", params.search)
+  if (params.page !== undefined) q.set("page", String(params.page))
+  if (params.pageSize !== undefined) q.set("pageSize", String(params.pageSize))
+  if (params.userId) q.set("userId", params.userId)
+  return apiFetch<AdminGenerationsListResponse>(`/admin/generations?${q.toString()}`)
+}

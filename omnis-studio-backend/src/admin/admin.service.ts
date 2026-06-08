@@ -221,4 +221,67 @@ export class AdminService implements OnModuleInit {
 
     return result;
   }
+
+  async listAllGenerations(params: {
+    type?: "image" | "video";
+    status?: "completed" | "processing" | "failed";
+    search?: string;
+    page: number;
+    pageSize: number;
+    userId?: string;
+  }) {
+    const { type, status, search, page, pageSize, userId } = params;
+    const safePage = Math.max(1, page);
+    const safePageSize = Math.min(Math.max(1, pageSize), 100);
+
+    const where: Record<string, unknown> = {};
+
+    if (type) where.type = type;
+    if (status) where.status = status;
+    if (userId) where.userId = userId;
+    if (search && search.trim().length > 0) {
+      where.prompt = {
+        contains: search.trim(),
+        mode: "insensitive",
+      };
+    }
+
+    const [total, jobs] = await Promise.all([
+      this.prisma.generationJob.count({ where: where as never }),
+      this.prisma.generationJob.findMany({
+        where: where as never,
+        orderBy: { createdAt: "desc" },
+        skip: (safePage - 1) * safePageSize,
+        take: safePageSize,
+        include: {
+          user: {
+            select: {
+              id: true,
+              email: true,
+            },
+          },
+        },
+      }),
+    ]);
+
+    return {
+      page: safePage,
+      pageSize: safePageSize,
+      total,
+      generations: jobs.map((job) => ({
+        id: job.id,
+        type: job.type,
+        prompt: job.prompt,
+        model: job.model,
+        creditsUsed: job.creditsUsed,
+        status: job.status,
+        imageUrl: job.imageUrl,
+        createdAt: job.createdAt.toISOString(),
+        user: {
+          id: job.user.id,
+          email: job.user.email,
+        },
+      })),
+    };
+  }
 }

@@ -17,6 +17,8 @@ import { LoginDto } from "./dto/login.dto.js";
 import { RegisterDto } from "./dto/register.dto.js";
 import { SendVerificationCodeDto } from "./dto/send-verification-code.dto.js";
 import { VerifyCodeDto } from "./dto/verify-code.dto.js";
+import { RequestPasswordResetDto } from "./dto/request-password-reset.dto.js";
+import { ResetPasswordDto } from "./dto/reset-password.dto.js";
 
 @Injectable()
 export class AuthService {
@@ -156,6 +158,80 @@ export class AuthService {
       }
       throw error;
     }
+  }
+
+  async requestPasswordReset(dto: RequestPasswordResetDto) {
+    const user = await this.prisma.user.findUnique({
+      where: { email: dto.email },
+      select: { id: true, deletedAt: true },
+    });
+
+    if (!user || user.deletedAt) {
+      return { success: true };
+    }
+
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const placeholderHash = await bcrypt.hash(`password-reset:${dto.email}:${code}`, 10);
+
+    await this.prisma.verificationCode.deleteMany({
+      where: { email: dto.email, used: false },
+    });
+
+    await this.prisma.verificationCode.create({
+      data: {
+        email: dto.email,
+        code,
+        passwordHash: placeholderHash,
+        expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+      },
+    });
+
+    try {
+      await this.mailService.sendPasswordResetCode(dto.email, code);
+    } catch {
+      throw new InternalServerErrorException("Failed to send password reset email");
+    }
+
+    return { success: true };
+  }
+
+  async resetPassword(dto: ResetPasswordDto) {
+    const record = await this.prisma.verificationCode.findFirst({
+      where: {
+        email: dto.email,
+        code: dto.code,
+        used: false,
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    if (!record || new Date(record.expiresAt).getTime() < Date.now()) {
+      throw new BadRequestException("Invalid or expired reset code");
+    }
+
+    const user = await this.prisma.user.findUnique({
+      where: { email: dto.email },
+      select: { id: true, deletedAt: true },
+    });
+
+    if (!user || user.deletedAt) {
+      throw new BadRequestException("Invalid or expired reset code");
+    }
+
+    const passwordHash = await bcrypt.hash(dto.password, 10);
+
+    await this.prisma.$transaction([
+      this.prisma.user.update({
+        where: { id: user.id },
+        data: { passwordHash },
+      }),
+      this.prisma.verificationCode.update({
+        where: { id: record.id },
+        data: { used: true },
+      }),
+    ]);
+
+    return { success: true };
   }
 
   async login(loginDto: LoginDto) {

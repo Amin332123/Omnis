@@ -158,9 +158,9 @@ export default function LoginPage() {
               />
               Remember me
             </label>
-            <a href="#" className="text-sm text-accent hover:underline">
+            <Link href="/forgot-password" className="text-sm text-accent hover:underline">
               Forgot password?
-            </a>
+            </Link>
           </div>
 
           {statusMessage ? (

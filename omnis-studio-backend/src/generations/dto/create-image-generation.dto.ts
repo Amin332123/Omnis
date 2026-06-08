@@ -45,6 +45,8 @@ export const SIZE_VALUES = [
 ] as const
 
 export const QUALITY_VALUES = ["standard", "high", "ultra"] as const
+export const REFERENCE_IMAGE_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"] as const
+export const MAX_REFERENCE_IMAGE_BYTES = 4 * 1024 * 1024
 
 export class CreateImageGenerationDto {
   @ApiProperty({

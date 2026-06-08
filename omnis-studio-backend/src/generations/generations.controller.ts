@@ -1,14 +1,37 @@
-import { Body, Controller, Get, HttpCode, Post, Req, UseGuards } from "@nestjs/common";
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  Post,
+  Req,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
+} from "@nestjs/common";
+import { FileInterceptor } from "@nestjs/platform-express";
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard.js";
 import { GenerationsService } from "./generations.service.js";
-import { CreateImageGenerationDto } from "./dto/create-image-generation.dto.js";
+import {
+  CreateImageGenerationDto,
+  MAX_REFERENCE_IMAGE_BYTES,
+  REFERENCE_IMAGE_MIME_TYPES,
+} from "./dto/create-image-generation.dto.js";
 
 type AuthenticatedUser = {
   id: string;
   email: string;
   credits: number;
   createdAt: Date;
+};
+
+export type UploadedReferenceImage = {
+  buffer: Buffer;
+  mimetype: string;
+  originalname: string;
+  size: number;
 };
 
 @ApiTags("generations")
@@ -20,6 +43,22 @@ export class GenerationsController {
 
   @Post("image")
   @HttpCode(200)
+  @UseInterceptors(
+    FileInterceptor("referenceImage", {
+      limits: { fileSize: MAX_REFERENCE_IMAGE_BYTES, files: 1 },
+      fileFilter: (_req, file, callback) => {
+        if ((REFERENCE_IMAGE_MIME_TYPES as readonly string[]).includes(file.mimetype)) {
+          callback(null, true);
+          return;
+        }
+
+        callback(
+          new BadRequestException("Reference image must be a JPG, PNG, or WebP file."),
+          false,
+        );
+      },
+    }),
+  )
   @ApiOperation({ summary: "Create an image generation job" })
   @ApiResponse({
     status: 200,
@@ -32,8 +71,9 @@ export class GenerationsController {
   createImageGeneration(
     @Req() req: { user: AuthenticatedUser },
     @Body() dto: CreateImageGenerationDto,
+    @UploadedFile() referenceImage?: UploadedReferenceImage,
   ) {
-    return this.generationsService.createImageGeneration(req.user.id, dto);
+    return this.generationsService.createImageGeneration(req.user.id, dto, referenceImage);
   }
 
   @Get("history")

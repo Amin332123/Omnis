@@ -1,4 +1,4 @@
-import { apiFetch } from "@/lib/api"
+import { ApiError, apiFetch, getStoredToken } from "@/lib/api"
 
 export type GenerationJob = {
   id: string
@@ -40,6 +40,7 @@ export type CreateImageGenerationPayload = {
   imageSize?: string
   style?: string
   quality?: string
+  referenceImage?: File
 }
 
 export type CreateImageGenerationResponse = {
@@ -63,11 +64,52 @@ export type CreditsConfig = {
   }
 }
 
-export const createImageGeneration = (payload: CreateImageGenerationPayload) =>
-  apiFetch<CreateImageGenerationResponse>("/generations/image", {
+const createImageGenerationWithReference = async (payload: CreateImageGenerationPayload) => {
+  const formData = new FormData()
+  formData.append("prompt", payload.prompt)
+  if (payload.model) formData.append("model", payload.model)
+  if (payload.provider) formData.append("provider", payload.provider)
+  if (payload.modelVersion) formData.append("modelVersion", payload.modelVersion)
+  if (payload.imageSize) formData.append("imageSize", payload.imageSize)
+  if (payload.style) formData.append("style", payload.style)
+  if (payload.quality) formData.append("quality", payload.quality)
+  if (payload.referenceImage) formData.append("referenceImage", payload.referenceImage)
+
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") ?? ""
+  const token = getStoredToken()
+  const response = await fetch(`${baseUrl}/generations/image`, {
     method: "POST",
-    body: payload,
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    body: formData,
   })
+
+  const data = (await response.json().catch(() => null)) as
+    | CreateImageGenerationResponse
+    | { message?: string | string[] }
+    | null
+
+  if (!response.ok) {
+    const rawMessage = data && "message" in data ? data.message : undefined
+    const message = Array.isArray(rawMessage)
+      ? rawMessage.join(", ")
+      : rawMessage || response.statusText || "Image generation failed"
+    throw new ApiError(response.status, message, data)
+  }
+
+  return data as CreateImageGenerationResponse
+}
+
+export const createImageGeneration = (payload: CreateImageGenerationPayload) => {
+  if (payload.referenceImage) {
+    return createImageGenerationWithReference(payload)
+  }
+
+  const { referenceImage: _referenceImage, ...jsonPayload } = payload
+  return apiFetch<CreateImageGenerationResponse>("/generations/image", {
+    method: "POST",
+    body: jsonPayload,
+  })
+}
 
 export type CreateVideoGenerationPayload = {
   prompt: string
@@ -116,4 +158,3 @@ export const getGenerationHistory = () => apiFetch<GenerationJob[]>("/generation
 export const getGenerationStats = () => apiFetch<GenerationStats>("/generations/stats")
 
 export const getCreditsConfig = () => apiFetch<CreditsConfig>("/credits/config")
-

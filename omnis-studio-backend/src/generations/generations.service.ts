@@ -18,12 +18,22 @@ import { calculateImageCredits } from "../credits/credits.config.js"
 import {
   CreateImageGenerationDto,
   FLUX_MODEL_VALUES,
+  MAX_REFERENCE_IMAGE_BYTES,
   OPENAI_MODEL_VALUES,
+  REFERENCE_IMAGE_MIME_TYPES,
   type Provider,
 } from "./dto/create-image-generation.dto.js"
 
 const IMAGE_TYPE = "image"
 const IMAGE_STATUS = "completed"
+const MAX_REFERENCE_GUIDANCE_LENGTH = 700
+
+type ReferenceImageUpload = {
+  buffer: Buffer
+  mimetype: string
+  originalname?: string
+  size: number
+}
 
 const STYLE_PROMPTS: Record<string, string> = {
   realistic: "photorealistic, natural colors, believable materials, crisp real-world detail",
@@ -60,7 +70,11 @@ export class GenerationsService {
     private readonly openaiService: OpenAIService,
   ) {}
 
-  async createImageGeneration(userId: string, dto: CreateImageGenerationDto) {
+  async createImageGeneration(
+    userId: string,
+    dto: CreateImageGenerationDto,
+    referenceImage?: ReferenceImageUpload,
+  ) {
     const prompt = dto.prompt.trim()
     if (!prompt) {
       throw new BadRequestException("Prompt is required")
@@ -86,7 +100,11 @@ export class GenerationsService {
       throw new HttpException("Insufficient credits", HttpStatus.PAYMENT_REQUIRED)
     }
 
-    const enhancedPrompt = this.buildEnhancedPrompt(prompt, dto, provider, modelKey)
+    const referenceGuidance = referenceImage
+      ? await this.createReferenceGuidance(prompt, referenceImage)
+      : undefined
+
+    const enhancedPrompt = this.buildEnhancedPrompt(prompt, dto, provider, modelKey, referenceGuidance)
 
     const { imageUrl, model: returnedModel } = await this.dispatchGeneration(
       provider,
@@ -121,7 +139,7 @@ export class GenerationsService {
         data: {
           userId,
           type: IMAGE_TYPE,
-          prompt,
+          prompt: referenceGuidance ? `${prompt}\n\nInspired by reference image.` : prompt,
           model: `${provider}:${finalModelLabel}`,
           creditsUsed: cost,
           status: IMAGE_STATUS,
@@ -323,6 +341,7 @@ export class GenerationsService {
     dto: CreateImageGenerationDto,
     provider: Provider,
     modelKey: string,
+    referenceGuidance?: string,
   ) {
     const stylePrompt = dto.style ? STYLE_PROMPTS[dto.style] : undefined
     const qualityPrompt = dto.quality ? QUALITY_PROMPTS[dto.quality] : QUALITY_PROMPTS.high
@@ -340,6 +359,9 @@ export class GenerationsService {
 
     return [
       prompt,
+      referenceGuidance
+        ? `Reference image inspiration: ${referenceGuidance}`
+        : undefined,
       stylePrompt,
       qualityPrompt,
       modelPrompt,
@@ -347,5 +369,51 @@ export class GenerationsService {
     ]
       .filter(Boolean)
       .join(", ")
+  }
+
+  private async createReferenceGuidance(prompt: string, image: ReferenceImageUpload) {
+    this.validateReferenceImage(image)
+
+    const dataUrl = `data:${image.mimetype};base64,${image.buffer.toString("base64")}`
+    const guidance = await this.openaiService.describeReferenceImage({
+      dataUrl,
+      prompt,
+    })
+
+    return guidance.trim().slice(0, MAX_REFERENCE_GUIDANCE_LENGTH)
+  }
+
+  private validateReferenceImage(image: ReferenceImageUpload) {
+    if (!image.buffer || image.buffer.length === 0) {
+      throw new BadRequestException("Reference image is empty")
+    }
+
+    if (image.size > MAX_REFERENCE_IMAGE_BYTES || image.buffer.length > MAX_REFERENCE_IMAGE_BYTES) {
+      throw new BadRequestException("Reference image must be 4MB or smaller")
+    }
+
+    if (!(REFERENCE_IMAGE_MIME_TYPES as readonly string[]).includes(image.mimetype)) {
+      throw new BadRequestException("Reference image must be a JPG, PNG, or WebP file")
+    }
+
+    const signature = image.buffer.subarray(0, 12)
+    const isJpeg = signature[0] === 0xff && signature[1] === 0xd8 && signature[2] === 0xff
+    const isPng =
+      signature[0] === 0x89 &&
+      signature[1] === 0x50 &&
+      signature[2] === 0x4e &&
+      signature[3] === 0x47
+    const isWebp =
+      signature.toString("ascii", 0, 4) === "RIFF" &&
+      signature.toString("ascii", 8, 12) === "WEBP"
+
+    const matchesMime =
+      (image.mimetype === "image/jpeg" && isJpeg) ||
+      (image.mimetype === "image/png" && isPng) ||
+      (image.mimetype === "image/webp" && isWebp)
+
+    if (!matchesMime) {
+      throw new BadRequestException("Reference image content does not match its file type")
+    }
   }
 }

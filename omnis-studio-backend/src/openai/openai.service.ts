@@ -24,6 +24,7 @@ import {
 const RETRY_DELAYS_MS = [750, 1500]
 const DEFAULT_OPENAI_SIZE: ImageGenerateParamsNonStreaming["size"] = "1024x1024"
 const DEFAULT_QUALITY: "low" | "medium" | "high" = "high"
+const DEFAULT_REFERENCE_ANALYSIS_MODEL = "gpt-4.1-mini"
 
 export type OpenAIImageParams = {
   prompt: string
@@ -39,11 +40,18 @@ export type OpenAIImageResult = {
   revisedPrompt?: string
 }
 
+export type OpenAIReferenceImageParams = {
+  dataUrl: string
+  prompt: string
+  model?: string
+}
+
 @Injectable()
 export class OpenAIService {
   private readonly logger = new Logger(OpenAIService.name)
   private readonly client: OpenAI
   private readonly apiKey: string
+  private readonly referenceAnalysisModel: string
 
   constructor(configService: ConfigService) {
     const apiKey = configService.get<string>("OPENAI_API_KEY")
@@ -51,6 +59,9 @@ export class OpenAIService {
       throw new Error("OPENAI_API_KEY is required to start the server")
     }
     this.apiKey = apiKey
+    this.referenceAnalysisModel =
+      configService.get<string>("OPENAI_REFERENCE_ANALYSIS_MODEL") ||
+      DEFAULT_REFERENCE_ANALYSIS_MODEL
     this.client = new OpenAI({ apiKey })
   }
 
@@ -98,6 +109,53 @@ export class OpenAIService {
     }
 
     throw new ServiceUnavailableException("OpenAI image generation failed")
+  }
+
+  async describeReferenceImage(params: OpenAIReferenceImageParams): Promise<string> {
+    if (!params.dataUrl.startsWith("data:image/")) {
+      throw new BadRequestException("Reference image must be a valid image data URL")
+    }
+
+    try {
+      const response = await this.client.chat.completions.create({
+        model: params.model || this.referenceAnalysisModel,
+        temperature: 0.2,
+        max_tokens: 180,
+        messages: [
+          {
+            role: "system",
+            content:
+              "You extract visual inspiration from a reference image for image generation. Describe reusable visual traits only: subject cues, composition, camera angle, lighting, palette, materials, mood, and style. Do not identify private people, read hidden text, or mention unsafe attributes. Keep it concise.",
+          },
+          {
+            role: "user",
+            content: [
+              {
+                type: "text",
+                text: `User prompt: ${params.prompt}\n\nSummarize the reference image as generation guidance in 1 compact paragraph.`,
+              },
+              {
+                type: "image_url",
+                image_url: {
+                  url: params.dataUrl,
+                  detail: "low",
+                },
+              },
+            ],
+          },
+        ],
+      } as any)
+
+      const text = response.choices?.[0]?.message?.content?.trim()
+      return text ? text.slice(0, 700) : ""
+    } catch (error) {
+      const mapped = this.mapToHttpException(error)
+      this.logger.error(
+        `OpenAI reference image analysis failed: ${this.normalizeErrorMessage(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      )
+      throw mapped
+    }
   }
 
   private async callImagesGenerate(

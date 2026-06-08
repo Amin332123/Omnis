@@ -26,6 +26,9 @@ import {
   ExternalLink,
   CheckCircle2,
   AlertCircle,
+  UploadCloud,
+  Trash2,
+  FileImage,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { LowCreditWarning } from "@/components/shared/low-credit-warning"
@@ -77,9 +80,17 @@ interface GeneratedImage {
   size: string
   imageUrl: string
   creditsUsed: number
+  referenceImageName?: string
 }
 
 const MAX_PROMPT_LENGTH = 500
+const MAX_REFERENCE_IMAGE_BYTES = 4 * 1024 * 1024
+const ACCEPTED_REFERENCE_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"]
+
+type ReferenceImage = {
+  file: File
+  previewUrl: string
+}
 
 const LOADING_STAGES = [
   { title: "Preparing prompt", description: "Polishing details and composition" },
@@ -168,6 +179,9 @@ export default function GenerateImagesPage() {
   const { refreshStats, refreshHistory } = useGenerations()
 
   const [prompt, setPrompt] = useState("")
+  const [referenceImage, setReferenceImage] = useState<ReferenceImage | null>(null)
+  const [referenceError, setReferenceError] = useState<string | null>(null)
+  const [isReferenceDragging, setIsReferenceDragging] = useState(false)
   const [provider, setProvider] = useState<ImageProvider>(DEFAULT_PROVIDER)
   const [fluxModel, setFluxModel] = useState<FluxModelVersion>(DEFAULT_FLUX_MODEL)
   const [openaiModel, setOpenaiModel] = useState<OpenAIModelVersion>(DEFAULT_OPENAI_MODEL)
@@ -198,6 +212,7 @@ export default function GenerateImagesPage() {
   const [compareError, setCompareError] = useState<string | null>(null)
 
   const previewRef = useRef<HTMLDivElement>(null)
+  const referenceInputRef = useRef<HTMLInputElement>(null)
   const loadingIntervalRef = useRef<number | null>(null)
   const downloadLinkRef = useRef<HTMLAnchorElement | null>(null)
 
@@ -239,6 +254,15 @@ export default function GenerateImagesPage() {
 
   useEffect(() => () => clearLoadingAnimation(), [clearLoadingAnimation])
 
+  useEffect(
+    () => () => {
+      if (referenceImage?.previewUrl) {
+        URL.revokeObjectURL(referenceImage.previewUrl)
+      }
+    },
+    [referenceImage]
+  )
+
   useEffect(() => {
     if (!isFullscreen) {
       const onKeyDown = (e: KeyboardEvent) => {
@@ -258,6 +282,55 @@ export default function GenerateImagesPage() {
     setIsFullscreen(false)
     setZoomLevel(1)
   }, [])
+
+  const setReferenceFile = useCallback((file: File | null) => {
+    setReferenceError(null)
+
+    if (!file) return
+
+    if (!ACCEPTED_REFERENCE_IMAGE_TYPES.includes(file.type)) {
+      setReferenceError("Use a JPG, PNG, or WebP image.")
+      return
+    }
+
+    if (file.size > MAX_REFERENCE_IMAGE_BYTES) {
+      setReferenceError("Reference image must be 4MB or smaller.")
+      return
+    }
+
+    setReferenceImage((current) => {
+      if (current?.previewUrl) URL.revokeObjectURL(current.previewUrl)
+      return {
+        file,
+        previewUrl: URL.createObjectURL(file),
+      }
+    })
+  }, [])
+
+  const clearReferenceImage = useCallback(() => {
+    setReferenceImage((current) => {
+      if (current?.previewUrl) URL.revokeObjectURL(current.previewUrl)
+      return null
+    })
+    setReferenceError(null)
+    if (referenceInputRef.current) referenceInputRef.current.value = ""
+  }, [])
+
+  const handleReferenceInputChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      setReferenceFile(event.target.files?.[0] ?? null)
+    },
+    [setReferenceFile]
+  )
+
+  const handleReferenceDrop = useCallback(
+    (event: React.DragEvent<HTMLDivElement>) => {
+      event.preventDefault()
+      setIsReferenceDragging(false)
+      setReferenceFile(event.dataTransfer.files?.[0] ?? null)
+    },
+    [setReferenceFile]
+  )
 
   const runGeneration = useCallback(
     async (
@@ -289,6 +362,7 @@ export default function GenerateImagesPage() {
           imageSize: size,
           style,
           quality,
+          referenceImage: referenceImage?.file,
         })
         const modelLabel =
           (providerChoice === "flux"
@@ -305,6 +379,7 @@ export default function GenerateImagesPage() {
           size,
           imageUrl: response.imageUrl,
           creditsUsed: response.creditsUsed ?? imageCost,
+          referenceImageName: referenceImage?.file.name,
         }
         setCurrentImage(result)
         setRecentPrompts((prev) => [trimmed, ...prev.filter((p) => p !== trimmed)].slice(0, 8))
@@ -324,7 +399,7 @@ export default function GenerateImagesPage() {
         setLoadingProgress(100)
       }
     },
-    [state, creditsRemaining, size, style, quality, currentImage, setUserCredits, refreshStats, refreshHistory, startLoadingAnimation, clearLoadingAnimation]
+    [state, creditsRemaining, size, style, quality, referenceImage, currentImage, setUserCredits, refreshStats, refreshHistory, startLoadingAnimation, clearLoadingAnimation]
   )
 
   const handleGenerate = useCallback(() => {
@@ -431,6 +506,7 @@ export default function GenerateImagesPage() {
         imageSize: size,
         style,
         quality,
+        referenceImage: referenceImage?.file,
       })
       const label =
         (compareProvider === "flux"
@@ -446,6 +522,7 @@ export default function GenerateImagesPage() {
         size,
         imageUrl: response.imageUrl,
         creditsUsed: response.creditsUsed ?? compareCost,
+        referenceImageName: referenceImage?.file.name,
       }
       setCompareResult(result)
       setUserCredits(response.creditsRemaining)
@@ -465,6 +542,7 @@ export default function GenerateImagesPage() {
     size,
     style,
     quality,
+    referenceImage,
     setUserCredits,
     refreshStats,
     refreshHistory,
@@ -571,6 +649,118 @@ export default function GenerateImagesPage() {
                       {promptQuality.hint}
                     </div>
                   </div>
+                </div>
+
+                <Separator />
+
+                {/* Inspiration image */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2">
+                      <FileImage className="h-3.5 w-3.5 text-muted" />
+                      <label className="text-sm font-medium text-foreground">Inspiration image</label>
+                    </div>
+                    <Badge variant="outline" className="text-[10px] px-1.5 py-0">
+                      Optional
+                    </Badge>
+                  </div>
+
+                  <input
+                    ref={referenceInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    className="hidden"
+                    onChange={handleReferenceInputChange}
+                  />
+
+                  {referenceImage ? (
+                    <div className="rounded-xl border border-border bg-secondary/40 p-3">
+                      <div className="flex items-center gap-3">
+                        <div className="h-20 w-20 overflow-hidden rounded-lg border border-border bg-card shrink-0">
+                          <img
+                            src={referenceImage.previewUrl}
+                            alt=""
+                            className="h-full w-full object-cover"
+                          />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="truncate text-sm font-medium text-foreground">
+                            {referenceImage.file.name}
+                          </div>
+                          <div className="mt-1 text-xs text-muted">
+                            {(referenceImage.file.size / 1024 / 1024).toFixed(2)} MB · visual guidance
+                          </div>
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="outline"
+                              className="h-8 gap-1.5 text-xs"
+                              onClick={() => referenceInputRef.current?.click()}
+                              disabled={state === "loading"}
+                            >
+                              <UploadCloud className="h-3.5 w-3.5" />
+                              Replace
+                            </Button>
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="ghost"
+                              className="h-8 gap-1.5 text-xs text-error hover:text-error"
+                              onClick={clearReferenceImage}
+                              disabled={state === "loading"}
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                              Remove
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => referenceInputRef.current?.click()}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter" || event.key === " ") {
+                          event.preventDefault()
+                          referenceInputRef.current?.click()
+                        }
+                      }}
+                      onDragOver={(event) => {
+                        event.preventDefault()
+                        setIsReferenceDragging(true)
+                      }}
+                      onDragLeave={() => setIsReferenceDragging(false)}
+                      onDrop={handleReferenceDrop}
+                      className={cn(
+                        "group flex min-h-[112px] cursor-pointer items-center gap-4 rounded-xl border border-dashed p-4 transition-all duration-200",
+                        isReferenceDragging
+                          ? "border-accent bg-accent/10"
+                          : "border-border bg-secondary/30 hover:border-accent/40 hover:bg-card-hover"
+                      )}
+                    >
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border border-border bg-card text-muted group-hover:text-accent">
+                        <UploadCloud className="h-5 w-5" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="text-sm font-medium text-foreground">
+                          Add a visual reference
+                        </div>
+                        <div className="mt-1 text-xs text-muted">
+                          JPG, PNG, or WebP · max 4MB
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {referenceError ? (
+                    <p className="text-xs text-error flex items-center gap-1.5">
+                      <AlertCircle className="h-3.5 w-3.5" />
+                      {referenceError}
+                    </p>
+                  ) : null}
                 </div>
 
                 <Separator />
@@ -797,6 +987,7 @@ export default function GenerateImagesPage() {
                     <SummaryRow label="Provider" value={provider === "flux" ? "Flux" : "OpenAI"} />
                     <SummaryRow label="Model" value={activeModelLabel} />
                     <SummaryRow label="Quality" value={quality} />
+                    <SummaryRow label="Reference" value={referenceImage ? "Included" : "None"} />
                     <SummaryRow label="ETA" value={estimatedTime} />
                   </div>
                   <div className="flex items-center justify-between text-xs text-muted">
@@ -962,6 +1153,7 @@ export default function GenerateImagesPage() {
                         <p className="text-sm text-muted mb-6">
                           Using {provider === "flux" ? "Flux" : "OpenAI"} · {activeModelLabel} ·{" "}
                           {estimatedTime}
+                          {referenceImage ? " · with reference" : ""}
                         </p>
 
                         <div className="w-full max-w-xs space-y-4">
@@ -1132,6 +1324,14 @@ export default function GenerateImagesPage() {
                             <span className="text-foreground font-medium">~{estimatedTime}</span>
                           </div>
                         </div>
+                        {currentImage.referenceImageName ? (
+                          <div className="mt-3 pt-3 border-t border-border">
+                            <span className="text-muted block mb-0.5 text-xs">Reference</span>
+                            <span className="text-foreground font-medium text-xs">
+                              {currentImage.referenceImageName}
+                            </span>
+                          </div>
+                        ) : null}
                         <div className="mt-3 pt-3 border-t border-border">
                           <p className="text-xs text-muted line-clamp-2">{currentImage.prompt}</p>
                         </div>

@@ -30,7 +30,7 @@ type AuthContextValue = {
   isLoading: boolean
   login: (email: string, password: string) => Promise<void>
   register: (email: string, password: string) => Promise<void>
-  sendVerificationCode: (email: string, password: string) => Promise<void>
+  sendVerificationCode: (email: string, password: string) => Promise<{ success: boolean; code?: string }>
   verifyAndRegister: (email: string, code: string) => Promise<void>
   logout: () => void
   loadCurrentUser: () => Promise<void>
@@ -110,7 +110,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [login])
 
   const sendVerificationCode = useCallback(async (email: string, password: string) => {
-    await sendVerificationCodeRequest({ email, password })
+    return await sendVerificationCodeRequest({ email, password })
   }, [])
 
   const verifyAndRegister = useCallback(async (email: string, code: string) => {

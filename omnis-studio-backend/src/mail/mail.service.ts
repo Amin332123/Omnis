@@ -1,28 +1,19 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import nodemailer from "nodemailer";
+
+const RESEND_API_URL = "https://api.resend.com/emails";
 
 @Injectable()
 export class MailService {
   private readonly logger = new Logger(MailService.name);
-  private transporter: nodemailer.Transporter | null = null;
+  private readonly apiKey: string | null;
 
   constructor(private readonly configService: ConfigService) {
-    const host = this.configService.get<string>("MAIL_HOST");
-    const port = this.configService.get<string>("MAIL_PORT");
-    const user = this.configService.get<string>("MAIL_USERNAME");
-    const pass = this.configService.get<string>("MAIL_PASSWORD");
-
-    if (host && port && user && pass) {
-      this.transporter = nodemailer.createTransport({
-        host,
-        port: Number(port),
-        secure: Number(port) === 465,
-        auth: { user, pass },
-      });
-      this.logger.log("Mail transporter initialized");
+    this.apiKey = this.configService.get<string>("RESEND_API_KEY") ?? null;
+    if (this.apiKey) {
+      this.logger.log("Resend API mailer initialized");
     } else {
-      this.logger.warn("Mail configuration incomplete — emails will be logged only");
+      this.logger.warn("RESEND_API_KEY not set — emails will be logged only");
     }
   }
 
@@ -87,21 +78,35 @@ export class MailService {
       </div>
     `;
 
-    if (this.transporter) {
-      try {
-        await this.transporter.sendMail({
+    if (!this.apiKey) {
+      this.logger.warn(`[FALLBACK] ${logLabel} for ${email}: ${code}`);
+      return;
+    }
+
+    try {
+      const response = await fetch(RESEND_API_URL, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${this.apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
           from: `"${fromName}" <${fromAddress}>`,
           to: email,
           subject,
           html,
-        });
-        this.logger.log(`${logLabel} sent to ${email}`);
-      } catch (error) {
-        this.logger.error(`Failed to send email to ${email}: ${(error as Error).message}`);
-        this.logger.warn(`[FALLBACK] ${logLabel} for ${email}: ${code}`);
+        }),
+      });
+
+      if (!response.ok) {
+        const errorBody = await response.text().catch(() => "unknown");
+        throw new Error(`Resend API returned ${response.status}: ${errorBody}`);
       }
-    } else {
-      this.logger.warn(`[DEV] ${logLabel} for ${email}: ${code}`);
+
+      this.logger.log(`${logLabel} sent to ${email}`);
+    } catch (error) {
+      this.logger.error(`Failed to send email to ${email}: ${(error as Error).message}`);
+      this.logger.warn(`[FALLBACK] ${logLabel} for ${email}: ${code}`);
     }
   }
 }

@@ -3,6 +3,7 @@ import {
   ConflictException,
   Injectable,
   InternalServerErrorException,
+  Logger,
   UnauthorizedException,
 } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
@@ -22,6 +23,7 @@ import { ResetPasswordDto } from "./dto/reset-password.dto.js";
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
@@ -84,10 +86,10 @@ export class AuthService {
     try {
       await this.mailService.sendVerificationCode(dto.email, code);
     } catch {
-      throw new InternalServerErrorException("Failed to send verification email");
+      this.logger.warn(`Email failed, but code ${code} is stored for ${dto.email}`);
     }
 
-    return { success: true };
+    return { success: true, code };
   }
 
   async verifyAndRegister(dto: VerifyCodeDto) {

@@ -107,6 +107,7 @@ export class MailService {
     } catch (error) {
       this.logger.error(`Failed to send email to ${email}: ${(error as Error).message}`);
       this.logger.warn(`[FALLBACK] ${logLabel} for ${email}: ${code}`);
+      throw error;
     }
   }
 }

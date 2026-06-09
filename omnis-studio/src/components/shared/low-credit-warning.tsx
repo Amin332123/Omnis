@@ -11,7 +11,7 @@ interface LowCreditWarningProps {
 }
 
 export function LowCreditWarning({ credits, className }: LowCreditWarningProps) {
-  if (credits >= 2) return null
+  if (credits > 0) return null
 
   return (
     <div
@@ -25,7 +25,7 @@ export function LowCreditWarning({ credits, className }: LowCreditWarningProps) 
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium text-foreground">
-          Only {formatCredits(credits)} credit{credits !== 1 ? "s" : ""} remaining
+          {credits === 0 ? "No credits remaining" : `Only ${formatCredits(credits)} credit${credits !== 1 ? "s" : ""} remaining`}
         </p>
         <p className="text-xs text-muted">
           Buy more credits to continue generating content

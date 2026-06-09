@@ -46,7 +46,7 @@ export const faqItems: FAQItem[] = [
   },
   {
     question: "Is there a free trial?",
-    answer: "Every new account gets 10 free credits to try the platform. That is enough for a standard video generation or several high-quality images.",
+    answer: "Every new account gets 1 free credit to try the platform. That is enough to generate one image and see what Omnis Studio can do. After that, you can purchase a credit pack to continue generating.",
   },
   {
     question: "How long does generation take?",

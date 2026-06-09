@@ -88,13 +88,18 @@ export class MailService {
     `;
 
     if (this.transporter) {
-      await this.transporter.sendMail({
-        from: `"${fromName}" <${fromAddress}>`,
-        to: email,
-        subject,
-        html,
-      });
-      this.logger.log(`${logLabel} sent to ${email}`);
+      try {
+        await this.transporter.sendMail({
+          from: `"${fromName}" <${fromAddress}>`,
+          to: email,
+          subject,
+          html,
+        });
+        this.logger.log(`${logLabel} sent to ${email}`);
+      } catch (error) {
+        this.logger.error(`Failed to send email to ${email}: ${(error as Error).message}`);
+        this.logger.warn(`[FALLBACK] ${logLabel} for ${email}: ${code}`);
+      }
     } else {
       this.logger.warn(`[DEV] ${logLabel} for ${email}: ${code}`);
     }

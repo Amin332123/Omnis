@@ -1,9 +1,26 @@
 import { Injectable, Logger, OnModuleInit, BadRequestException, NotFoundException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import bcrypt from "bcrypt";
+import { Prisma } from "../generated/prisma/client.js";
 import { PrismaService } from "../prisma/prisma.service.js";
 import { UpdateUserCreditsDto } from "./dto/update-user-credits.dto.js";
 import { UpdateUserPasswordDto } from "./dto/update-user-password.dto.js";
+
+const HOMEPAGE_SLOT_COUNT = 6;
+
+type PreferredHomepageRow = {
+  slot: number;
+  generation_id: string;
+  type: string;
+  prompt: string;
+  model: string;
+  credits_used: number;
+  status: string;
+  image_url: string | null;
+  created_at: Date;
+  user_id: string;
+  user_email: string;
+};
 
 @Injectable()
 export class AdminService implements OnModuleInit {
@@ -283,5 +300,105 @@ export class AdminService implements OnModuleInit {
         },
       })),
     };
+  }
+
+  async getPreferredHomepageContent() {
+    const rows = await this.prisma.$queryRaw<PreferredHomepageRow[]>(Prisma.sql`
+      SELECT
+        p.slot,
+        g.id AS generation_id,
+        g.type,
+        g.prompt,
+        g.model,
+        g.credits_used,
+        g.status,
+        g.output_url AS image_url,
+        g.created_at,
+        u.id AS user_id,
+        u.email AS user_email
+      FROM preferred_homepage_generations p
+      INNER JOIN generation_jobs g ON g.id = p.generation_id
+      INNER JOIN users u ON u.id = g.user_id
+      ORDER BY p.slot ASC
+    `);
+
+    return {
+      slots: Array.from({ length: HOMEPAGE_SLOT_COUNT }, (_, index) => {
+        const slot = index + 1;
+        const row = rows.find((item) => item.slot === slot);
+
+        return {
+          slot,
+          generation: row
+            ? {
+                id: row.generation_id,
+                type: row.type,
+                prompt: row.prompt,
+                model: row.model,
+                creditsUsed: row.credits_used,
+                status: row.status,
+                imageUrl: row.image_url,
+                createdAt: row.created_at.toISOString(),
+                user: {
+                  id: row.user_id,
+                  email: row.user_email,
+                },
+              }
+            : null,
+        };
+      }),
+    };
+  }
+
+  async setPreferredHomepageContent(slot: number, generationId: string) {
+    this.assertHomepageSlot(slot);
+
+    const generation = await this.prisma.generationJob.findFirst({
+      where: {
+        id: generationId,
+        type: "image",
+        status: "completed",
+        imageUrl: { not: null },
+      },
+      select: { id: true },
+    });
+
+    if (!generation) {
+      throw new BadRequestException("Choose a completed image generation with an output URL.");
+    }
+
+    await this.prisma.$transaction(async (tx) => {
+      await tx.$executeRaw(Prisma.sql`
+        DELETE FROM preferred_homepage_generations
+        WHERE generation_id = ${generationId}::uuid AND slot <> ${slot}
+      `);
+
+      await tx.$executeRaw(Prisma.sql`
+        INSERT INTO preferred_homepage_generations (slot, generation_id, updated_at)
+        VALUES (${slot}, ${generationId}::uuid, CURRENT_TIMESTAMP)
+        ON CONFLICT (slot) DO UPDATE SET
+          generation_id = EXCLUDED.generation_id,
+          updated_at = CURRENT_TIMESTAMP
+      `);
+    });
+
+    return this.getPreferredHomepageContent();
+  }
+
+  async clearPreferredHomepageContent(slot: number) {
+    this.assertHomepageSlot(slot);
+
+    await this.prisma.$executeRaw(Prisma.sql`
+      DELETE FROM preferred_homepage_generations
+      WHERE slot = ${slot}
+    `);
+
+    return this.getPreferredHomepageContent();
+  }
+
+  private assertHomepageSlot(slot: number) {
+    if (!Number.isInteger(slot) || slot < 1 || slot > HOMEPAGE_SLOT_COUNT) {
+      throw new BadRequestException("slot must be between 1 and 6");
+    }
   }
 }

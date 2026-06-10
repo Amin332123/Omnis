@@ -118,6 +118,29 @@ export class AdminController {
     return this.plansService.remove(id);
   }
 
+  @Get("preferred-content")
+  @ApiOperation({ summary: "Get the six preferred homepage image slots" })
+  getPreferredContent() {
+    return this.adminService.getPreferredHomepageContent();
+  }
+
+  @Patch("preferred-content/:slot")
+  @ApiOperation({ summary: "Set a preferred homepage image slot" })
+  @ApiParam({ name: "slot", type: Number })
+  setPreferredContent(
+    @Param("slot", ParseIntPipe) slot: number,
+    @Body() dto: { generationId: string },
+  ) {
+    return this.adminService.setPreferredHomepageContent(slot, dto.generationId);
+  }
+
+  @Delete("preferred-content/:slot")
+  @ApiOperation({ summary: "Clear a preferred homepage image slot" })
+  @ApiParam({ name: "slot", type: Number })
+  clearPreferredContent(@Param("slot", ParseIntPipe) slot: number) {
+    return this.adminService.clearPreferredHomepageContent(slot);
+  }
+
   @Get("generations")
   @ApiOperation({ summary: "List all generations across all users with filtering" })
   @ApiQuery({ name: "type", required: false, enum: ["image", "video"] })

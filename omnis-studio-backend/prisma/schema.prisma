@@ -79,6 +79,18 @@ model GenerationJob {
   createdAt   DateTime @default(now()) @map("created_at")
 
   user User @relation(fields: [userId], references: [id])
+  preferredHomepageSlots PreferredHomepageGeneration[]
 
   @@map("generation_jobs")
+}
+
+model PreferredHomepageGeneration {
+  slot         Int           @id
+  generationId String       @unique @db.Uuid @map("generation_id")
+  createdAt    DateTime     @default(now()) @map("created_at")
+  updatedAt    DateTime     @updatedAt @map("updated_at")
+
+  generation GenerationJob @relation(fields: [generationId], references: [id], onDelete: Cascade)
+
+  @@map("preferred_homepage_generations")
 }

@@ -140,6 +140,7 @@ export function Hero() {
           muted
           loop
           playsInline
+          preload="auto"
           className="absolute inset-0 w-full h-full object-cover"
         >
           <source src="/bg_light.mp4" type="video/mp4" />
@@ -154,6 +155,7 @@ export function Hero() {
           muted
           loop
           playsInline
+          preload="auto"
           className="absolute inset-0 w-full h-full object-cover"
         >
           <source src="/hero_bg_dark.mp4" type="video/mp4" />

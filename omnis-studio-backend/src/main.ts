@@ -14,6 +14,8 @@ async function bootstrap() {
     "http://127.0.0.1:3001",
     "http://127.0.0.1:4002",
     "https://omnis-gray-omega.vercel.app",
+    "https://omnis-studio.com",
+    "https://www.omnis-studio.com",
   ];
 
   const corsOrigins = process.env.CORS_ORIGINS

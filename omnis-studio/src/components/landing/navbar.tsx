@@ -58,7 +58,7 @@ export function Navbar() {
             </Link>
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className={`md:hidden h-9 w-9 rounded-lg border flex items-center justify-center transition-colors duration-300 ${isScrolled ? "border-border text-foreground" : "border-white/30 text-white"}`}
+              className={`md:hidden h-9 w-9 rounded-lg border flex items-center justify-center transition-colors duration-300 ${isOpen ? "border-border bg-background/95 text-foreground" : isScrolled ? "border-border text-foreground" : "border-white/30 text-white"}`}
             >
               {isOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
             </button>

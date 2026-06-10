@@ -4,8 +4,12 @@ import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from "@
 export class EmailVerifiedGuard implements CanActivate {
   canActivate(context: ExecutionContext) {
     const req = context.switchToHttp().getRequest<{
-      user?: { isEmailVerified?: boolean };
+      user?: { isEmailVerified?: boolean; isAdmin?: boolean };
     }>();
+
+    if (req.user?.isAdmin) {
+      return true;
+    }
 
     if (!req.user?.isEmailVerified) {
       throw new ForbiddenException("Please verify your email before accessing this resource.");

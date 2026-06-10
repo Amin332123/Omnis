@@ -55,7 +55,7 @@ export default function DashboardLayout({
       return
     }
 
-    if (!isLoading && user && user.isEmailVerified === false) {
+    if (!isLoading && user && user.isEmailVerified === false && !user.isAdmin) {
       router.replace("/verify-email")
     }
   }, [isLoading, user, router])

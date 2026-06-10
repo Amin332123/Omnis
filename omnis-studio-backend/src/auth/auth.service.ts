@@ -349,7 +349,10 @@ export class AuthService {
       throw new UnauthorizedException("Invalid email or password");
     }
 
-    if (!user.isEmailVerified) {
+    const adminEmail = this.configService.get<string>("ADMIN_EMAIL");
+    const isAdmin = !!adminEmail && user.email.toLowerCase() === adminEmail.toLowerCase();
+
+    if (!user.isEmailVerified && !isAdmin) {
       throw new ForbiddenException({
         message: "Please verify your email before logging in.",
         resend_verification: true,

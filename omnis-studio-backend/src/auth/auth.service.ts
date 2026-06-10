@@ -1,13 +1,16 @@
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   Injectable,
   InternalServerErrorException,
   Logger,
   UnauthorizedException,
 } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 import bcrypt from "bcrypt";
+import { randomBytes } from "crypto";
 import { writeFile, unlink, mkdir } from "fs/promises";
 import { join, dirname } from "path";
 import { existsSync } from "fs";
@@ -28,13 +31,16 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
     private readonly mailService: MailService,
+    private readonly configService: ConfigService,
   ) {}
 
   async register(registerDto: RegisterDto) {
     const passwordHash = await bcrypt.hash(registerDto.password, 10);
 
+    let user: { id: string; email: string; credits: number };
+
     try {
-      return await this.prisma.user.create({
+      user = await this.prisma.user.create({
         data: {
           email: registerDto.email,
           passwordHash,
@@ -55,6 +61,12 @@ export class AuthService {
 
       throw error;
     }
+
+    await this.sendEmailVerificationLink(user.id).catch((err) => {
+      this.logger.warn(`Failed to send verification email to ${user.email}: ${(err as Error).message}`);
+    });
+
+    return user;
   }
 
   async sendVerificationCode(dto: SendVerificationCodeDto) {
@@ -133,6 +145,7 @@ export class AuthService {
             emailNotifications: true,
             marketingEmails: false,
             avatarUrl: null,
+            isEmailVerified: true,
           },
         });
         userId = existing.id;
@@ -141,6 +154,7 @@ export class AuthService {
           data: {
             email: dto.email,
             passwordHash: record.passwordHash,
+            isEmailVerified: true,
           },
           select: { id: true },
         });
@@ -160,6 +174,74 @@ export class AuthService {
       }
       throw error;
     }
+  }
+
+  async sendEmailVerificationLink(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, email: true, isEmailVerified: true },
+    });
+
+    if (!user) {
+      throw new BadRequestException("User not found");
+    }
+
+    if (user.isEmailVerified) {
+      throw new BadRequestException("Email is already verified.");
+    }
+
+    await this.prisma.emailVerificationToken.deleteMany({
+      where: { userId: user.id, used: false },
+    });
+
+    const token = randomBytes(32).toString("hex");
+
+    await this.prisma.emailVerificationToken.create({
+      data: {
+        userId: user.id,
+        token,
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+      },
+    });
+
+    const frontendUrl =
+      this.configService.get<string>("FRONTEND_URL") || "http://localhost:3000";
+    const verificationLink = `${frontendUrl}/verify-email?token=${token}`;
+
+    try {
+      await this.mailService.sendEmailVerificationLink(user.email, verificationLink);
+    } catch {
+      this.logger.warn(`Email verification link sending failed for ${user.email}. Link: ${verificationLink}`);
+    }
+
+    return { success: true };
+  }
+
+  async verifyEmail(token: string) {
+    const record = await this.prisma.emailVerificationToken.findUnique({
+      where: { token },
+    });
+
+    if (!record || record.used) {
+      throw new BadRequestException("Invalid or expired verification token.");
+    }
+
+    if (new Date(record.expiresAt).getTime() < Date.now()) {
+      throw new BadRequestException("Verification token has expired.");
+    }
+
+    await this.prisma.$transaction([
+      this.prisma.emailVerificationToken.update({
+        where: { id: record.id },
+        data: { used: true },
+      }),
+      this.prisma.user.update({
+        where: { id: record.userId },
+        data: { isEmailVerified: true },
+      }),
+    ]);
+
+    return { success: true };
   }
 
   async requestPasswordReset(dto: RequestPasswordResetDto) {
@@ -244,6 +326,7 @@ export class AuthService {
         email: true,
         passwordHash: true,
         deletedAt: true,
+        isEmailVerified: true,
       },
     });
 
@@ -264,6 +347,13 @@ export class AuthService {
 
     if (!isValidPassword) {
       throw new UnauthorizedException("Invalid email or password");
+    }
+
+    if (!user.isEmailVerified) {
+      throw new ForbiddenException({
+        message: "Please verify your email before logging in.",
+        resend_verification: true,
+      });
     }
 
     const payload = { sub: user.id, email: user.email };

@@ -12,8 +12,10 @@ import {
   type AuthUserResponse,
   login as loginRequest,
   register as registerRequest,
+  resendVerification as resendVerificationRequest,
   sendVerificationCode as sendVerificationCodeRequest,
   verifyAndRegister as verifyAndRegisterRequest,
+  verifyEmailToken as verifyEmailTokenRequest,
   getCurrentUser,
 } from "@/lib/auth-api"
 import {
@@ -32,6 +34,8 @@ type AuthContextValue = {
   register: (email: string, password: string) => Promise<void>
   sendVerificationCode: (email: string, password: string) => Promise<{ success: boolean; code?: string }>
   verifyAndRegister: (email: string, code: string) => Promise<void>
+  resendVerification: () => Promise<void>
+  verifyEmailToken: (token: string) => Promise<void>
   logout: () => void
   loadCurrentUser: () => Promise<void>
   setUserCredits: (credits: number) => void
@@ -70,6 +74,7 @@ const buildUser = (data: AuthUserResponse): User => {
     avatarUrl: data.avatarUrl,
     emailNotifications: data.emailNotifications,
     marketingEmails: data.marketingEmails,
+    isEmailVerified: data.isEmailVerified,
     createdAt: data.createdAt,
     isAdmin: data.isAdmin,
     displayName,
@@ -120,6 +125,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await loadCurrentUser()
   }, [loadCurrentUser])
 
+  const resendVerification = useCallback(async () => {
+    await resendVerificationRequest()
+  }, [])
+
+  const verifyEmailToken = useCallback(async (token: string) => {
+    await verifyEmailTokenRequest(token)
+    await loadCurrentUser()
+  }, [loadCurrentUser])
+
   const logout = useCallback(() => {
     clearStoredToken()
     setToken(null)
@@ -152,11 +166,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       register,
       sendVerificationCode,
       verifyAndRegister,
+      resendVerification,
+      verifyEmailToken,
       logout,
       loadCurrentUser,
       setUserCredits,
     }),
-    [user, token, isLoading, login, register, sendVerificationCode, verifyAndRegister, logout, loadCurrentUser, setUserCredits]
+    [user, token, isLoading, login, register, sendVerificationCode, verifyAndRegister, resendVerification, verifyEmailToken, logout, loadCurrentUser, setUserCredits]
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

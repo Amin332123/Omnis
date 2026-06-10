@@ -52,6 +52,11 @@ export default function DashboardLayout({
   useEffect(() => {
     if (!isLoading && !user) {
       router.replace("/login")
+      return
+    }
+
+    if (!isLoading && user && user.isEmailVerified === false) {
+      router.replace("/verify-email")
     }
   }, [isLoading, user, router])
 

@@ -11,6 +11,7 @@ import {
   UseGuards,
 } from "@nestjs/common";
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiQuery, ApiTags } from "@nestjs/swagger";
+import { EmailVerifiedGuard } from "../auth/guards/email-verified.guard.js";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard.js";
 import { AdminGuard } from "./guards/admin.guard.js";
 import { AdminService } from "./admin.service.js";
@@ -23,7 +24,7 @@ import { ListAllGenerationsDto } from "./dto/list-all-generations.dto.js";
 
 @ApiTags("admin")
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard, AdminGuard)
+@UseGuards(JwtAuthGuard, EmailVerifiedGuard, AdminGuard)
 @Controller("admin")
 export class AdminController {
   constructor(

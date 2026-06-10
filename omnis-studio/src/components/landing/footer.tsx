@@ -1,12 +1,27 @@
-"use client"
-
 import Link from "next/link"
 import { Heart } from "lucide-react"
 
-const footerLinks = {
-  Product: ["Features", "Pricing", "FAQ", "Changelog"],
-  Company: ["About", "Blog", "Careers", "Contact"],
-  Legal: ["Privacy", "Terms", "Security", "Cookies"],
+type FooterLink = { name: string; href: string }
+
+const footerLinks: Record<string, FooterLink[]> = {
+  Product: [
+    { name: "Features", href: "/#features" },
+    { name: "Pricing", href: "/#pricing" },
+    { name: "FAQ", href: "/#faq" },
+    { name: "Changelog", href: "/changelog" },
+  ],
+  Company: [
+    { name: "About", href: "/about" },
+    { name: "Blog", href: "/blog" },
+    { name: "Careers", href: "/careers" },
+    { name: "Contact", href: "/contact" },
+  ],
+  Legal: [
+    { name: "Privacy", href: "/privacy" },
+    { name: "Terms", href: "/terms" },
+    { name: "Security", href: "/security" },
+    { name: "Cookies", href: "/cookies" },
+  ],
 }
 
 export function Footer() {
@@ -28,13 +43,13 @@ export function Footer() {
               <h4 className="text-sm font-semibold text-foreground mb-4">{category}</h4>
               <ul className="space-y-3">
                 {links.map((link) => (
-                  <li key={link}>
-                    <a
-                      href="#"
+                  <li key={link.name}>
+                    <Link
+                      href={link.href}
                       className="text-sm text-muted hover:text-foreground transition-colors"
                     >
-                      {link}
-                    </a>
+                      {link.name}
+                    </Link>
                   </li>
                 ))}
               </ul>

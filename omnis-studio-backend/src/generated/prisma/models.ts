@@ -10,6 +10,7 @@
  */
 export type * from './models/Plan.js'
 export type * from './models/VerificationCode.js'
+export type * from './models/EmailVerificationToken.js'
 export type * from './models/User.js'
 export type * from './models/GenerationJob.js'
 export type * from './commonInputTypes.js'

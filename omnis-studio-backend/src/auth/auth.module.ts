@@ -5,6 +5,7 @@ import { PassportModule } from "@nestjs/passport";
 import { MailModule } from "../mail/mail.module.js";
 import { AuthController } from "./auth.controller.js";
 import { AuthService } from "./auth.service.js";
+import { EmailVerifiedGuard } from "./guards/email-verified.guard.js";
 import { JwtAuthGuard } from "./guards/jwt-auth.guard.js";
 import { JwtStrategy } from "./strategies/jwt.strategy.js";
 
@@ -25,6 +26,6 @@ import { JwtStrategy } from "./strategies/jwt.strategy.js";
     MailModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, JwtAuthGuard],
+  providers: [AuthService, JwtStrategy, JwtAuthGuard, EmailVerifiedGuard],
 })
 export class AuthModule {}

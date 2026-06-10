@@ -85,6 +85,11 @@ export default function LoginPage() {
         return
       }
 
+      if (error instanceof ApiError && error.status === 403) {
+        router.push("/verify-email")
+        return
+      }
+
       if (error instanceof ApiError && error.status === 400) {
         setStatusMessage({
           type: "error",

@@ -3,6 +3,7 @@ import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagg
 import { VideoService } from "./video.service.js";
 import { CreateVideoDto } from "./dto/create-video.dto.js";
 import { EstimateCostDto } from "./dto/estimate-cost.dto.js";
+import { EmailVerifiedGuard } from "../auth/guards/email-verified.guard.js";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard.js";
 
 type AuthenticatedUser = {
@@ -14,7 +15,7 @@ type AuthenticatedUser = {
 
 @ApiTags("videos")
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, EmailVerifiedGuard)
 @Controller("api/videos")
 export class VideoController {
   constructor(private readonly videoService: VideoService) {}

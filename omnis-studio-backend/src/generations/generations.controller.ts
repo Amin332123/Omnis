@@ -12,6 +12,7 @@ import {
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
+import { EmailVerifiedGuard } from "../auth/guards/email-verified.guard.js";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard.js";
 import { GenerationsService } from "./generations.service.js";
 import {
@@ -36,7 +37,7 @@ export type UploadedReferenceImage = {
 
 @ApiTags("generations")
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, EmailVerifiedGuard)
 @Controller("generations")
 export class GenerationsController {
   constructor(private readonly generationsService: GenerationsService) {}

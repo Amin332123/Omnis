@@ -29,6 +29,7 @@ import {
   ApiUnauthorizedResponse,
 } from "@nestjs/swagger";
 import { AuthService } from "./auth.service.js";
+import { EmailVerifiedGuard } from "./guards/email-verified.guard.js";
 import { JwtAuthGuard } from "./guards/jwt-auth.guard.js";
 import { Request } from "express";
 import { LoginDto } from "./dto/login.dto.js";
@@ -47,6 +48,7 @@ type AuthenticatedUser = {
   avatarUrl: string | null;
   emailNotifications: boolean;
   marketingEmails: boolean;
+  isEmailVerified: boolean;
   createdAt: Date;
   isAdmin?: boolean;
 };
@@ -103,6 +105,27 @@ export class AuthController {
     return this.authService.verifyAndRegister(dto);
   }
 
+  @Post("send-email-verification-link")
+  @UseGuards(JwtAuthGuard)
+  @Throttle({ default: { limit: 3, ttl: hours(1) } })
+  @HttpCode(200)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Send a verification link to the user's email" })
+  @ApiOkResponse({ description: "Verification link sent." })
+  @ApiBadRequestResponse({ description: "Email already verified or user not found" })
+  sendEmailVerificationLink(@Req() req: Request & { user: AuthenticatedUser }) {
+    return this.authService.sendEmailVerificationLink(req.user.id);
+  }
+
+  @Post("verify-email")
+  @HttpCode(200)
+  @ApiOperation({ summary: "Verify email using a token from the verification link" })
+  @ApiOkResponse({ description: "Email verified successfully." })
+  @ApiBadRequestResponse({ description: "Invalid or expired token" })
+  verifyEmail(@Body("token") token: string) {
+    return this.authService.verifyEmail(token);
+  }
+
   @Post("request-password-reset")
   @Throttle({ default: { limit: 3, ttl: hours(1) } })
   @HttpCode(200)
@@ -144,7 +167,7 @@ export class AuthController {
   }
 
   @Post("avatar")
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, EmailVerifiedGuard)
   @UseInterceptors(FileInterceptor("avatar"))
   @ApiBearerAuth()
   @ApiConsumes("multipart/form-data")
@@ -169,7 +192,7 @@ export class AuthController {
   }
 
   @Get("notifications")
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, EmailVerifiedGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: "Get notification preferences" })
   @ApiOkResponse({ description: "Notification preferences." })
@@ -181,7 +204,7 @@ export class AuthController {
   }
 
   @Patch("notifications")
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, EmailVerifiedGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: "Update notification preferences" })
   @ApiOkResponse({ description: "Preferences updated." })
@@ -193,7 +216,7 @@ export class AuthController {
   }
 
   @Delete("account")
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, EmailVerifiedGuard)
   @HttpCode(200)
   @ApiBearerAuth()
   @ApiOperation({ summary: "Soft delete own account" })

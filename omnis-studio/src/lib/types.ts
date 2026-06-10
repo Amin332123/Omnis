@@ -4,6 +4,7 @@ export interface User {
   credits: number
   createdAt: string
   isAdmin?: boolean
+  isEmailVerified?: boolean
   displayName?: string
   initials?: string
   avatarUrl?: string | null

@@ -7,6 +7,7 @@ export type AuthUserResponse = {
   avatarUrl?: string | null
   emailNotifications?: boolean
   marketingEmails?: boolean
+  isEmailVerified: boolean
   createdAt: string
   isAdmin?: boolean
 }
@@ -104,6 +105,17 @@ export const updateNotificationPrefs = (prefs: { emailNotifications?: boolean; m
 export const deleteAccount = () =>
   apiFetch<{ success: boolean }>("/auth/account", {
     method: "DELETE",
+  })
+
+export const resendVerification = () =>
+  apiFetch<{ success: boolean }>("/auth/send-email-verification-link", {
+    method: "POST",
+  })
+
+export const verifyEmailToken = (token: string) =>
+  apiFetch<{ success: boolean }>("/auth/verify-email", {
+    method: "POST",
+    body: { token },
   })
 
 export const uploadAvatar = (file: File) => {

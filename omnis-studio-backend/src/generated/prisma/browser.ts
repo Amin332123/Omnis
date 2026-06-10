@@ -28,6 +28,11 @@ export type Plan = Prisma.PlanModel
  */
 export type VerificationCode = Prisma.VerificationCodeModel
 /**
+ * Model EmailVerificationToken
+ * 
+ */
+export type EmailVerificationToken = Prisma.EmailVerificationTokenModel
+/**
  * Model User
  * 
  */

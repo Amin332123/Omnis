@@ -89,7 +89,7 @@ export class AuthService {
       this.logger.warn(`Email failed, but code ${code} is stored for ${dto.email}`);
     }
 
-    return { success: true, code };
+    return { success: true };
   }
 
   async verifyAndRegister(dto: VerifyCodeDto) {

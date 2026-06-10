@@ -62,15 +62,10 @@ export default function RegisterPage() {
 
     setIsSubmitting(true)
     try {
-      const response = await sendVerificationCode(formValues.email.trim(), formValues.password)
+      await sendVerificationCode(formValues.email.trim(), formValues.password)
       setStep("code")
       setResendTimer(60)
-      if (response.code) {
-        setCodeDigits(response.code.split(""))
-        setStatusMessage({ type: "success", message: `Verification code: ${response.code} (also sent to your email)` })
-      } else {
-        setStatusMessage({ type: "success", message: "Verification code sent to your email." })
-      }
+      setStatusMessage({ type: "success", message: "Verification code sent to your email." })
     } catch (error) {
       if (error instanceof ApiError && error.status === 409) {
         setStatusMessage({ type: "error", message: "Email already exists." })
@@ -92,14 +87,9 @@ export default function RegisterPage() {
     setStatusMessage(null)
     setIsSubmitting(true)
     try {
-      const response = await sendVerificationCode(formValues.email.trim(), formValues.password)
+      await sendVerificationCode(formValues.email.trim(), formValues.password)
       setResendTimer(60)
-      if (response.code) {
-        setCodeDigits(response.code.split(""))
-        setStatusMessage({ type: "success", message: `New code: ${response.code}` })
-      } else {
-        setStatusMessage({ type: "success", message: "New code sent." })
-      }
+      setStatusMessage({ type: "success", message: "New code sent." })
     } catch {
       setStatusMessage({ type: "error", message: "Failed to resend code." })
     } finally {

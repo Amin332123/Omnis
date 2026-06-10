@@ -66,7 +66,7 @@ export const register = (payload: RegisterPayload) =>
   })
 
 export const sendVerificationCode = (payload: SendVerificationCodePayload) =>
-  apiFetch<{ success: boolean; code?: string }>("/auth/send-verification-code", {
+  apiFetch<{ success: boolean }>("/auth/send-verification-code", {
     method: "POST",
     body: payload,
     auth: false,

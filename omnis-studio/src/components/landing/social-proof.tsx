@@ -110,17 +110,23 @@ export function SocialProof() {
                   <motion.div
                     key={gen.id}
                     variants={itemVariants}
-                    whileHover={{ scale: 1.03, y: -4 }}
-                    className="relative group aspect-square rounded-xl overflow-hidden cursor-pointer bg-card"
+                    whileHover={{ y: -4 }}
+                    className="relative group rounded-xl overflow-hidden cursor-pointer"
                   >
-                    <img
-                      src={gen.imageUrl}
-                      alt={gen.prompt}
-                      loading="lazy"
-                      className="absolute inset-0 w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    <div className="absolute bottom-0 left-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div className="aspect-square">
+                      <img
+                        src={gen.imageUrl}
+                        alt={gen.prompt}
+                        loading="lazy"
+                        referrerPolicy="no-referrer"
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = "none"
+                        }}
+                      />
+                    </div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-xl" />
+                    <div className="absolute bottom-0 left-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
                       <p className="text-xs text-white/90 leading-tight line-clamp-2">
                         {gen.prompt}
                       </p>

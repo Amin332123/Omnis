@@ -59,8 +59,8 @@ export class MailService {
     logLabel: string;
   }): Promise<void> {
     const fromAddress =
-      this.configService.get<string>("MAIL_FROM_ADDRESS") || "noreply@omnisstudio.com";
-    const fromName = this.configService.get<string>("MAIL_FROM_NAME") || "OmnisStudio";
+      this.configService.get<string>("MAIL_FROM_ADDRESS") || "noreply@omnis-studio.com";
+    const fromName = this.configService.get<string>("MAIL_FROM_NAME") || "Omnis studio";
 
     const html = `
       <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto;">

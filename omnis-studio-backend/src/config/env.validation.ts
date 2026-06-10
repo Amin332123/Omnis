@@ -3,6 +3,9 @@ type EnvConfig = {
   OPENAI_API_KEY: string
   JWT_SECRET: string
   DATABASE_URL: string
+  RESEND_API_KEY?: string
+  MAIL_FROM_ADDRESS?: string
+  MAIL_FROM_NAME?: string
   PORT?: string
   RATE_LIMIT_TTL?: string
   RATE_LIMIT_LIMIT?: string
@@ -18,7 +21,13 @@ const REQUIRED_KEYS: Array<keyof EnvConfig> = [
 ]
 
 const OPTIONAL_NUMBER_KEYS: Array<keyof EnvConfig> = ["RATE_LIMIT_TTL", "RATE_LIMIT_LIMIT"]
-const OPTIONAL_STRING_KEYS: Array<keyof EnvConfig> = ["ADMIN_EMAIL", "ADMIN_PASSWORD"]
+const OPTIONAL_STRING_KEYS: Array<keyof EnvConfig> = [
+  "RESEND_API_KEY",
+  "MAIL_FROM_ADDRESS",
+  "MAIL_FROM_NAME",
+  "ADMIN_EMAIL",
+  "ADMIN_PASSWORD",
+]
 
 export const validateEnvironment = (config: Record<string, unknown>) => {
   for (const key of REQUIRED_KEYS) {

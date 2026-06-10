@@ -14,6 +14,7 @@ import {
   MaxFileSizeValidator,
   FileTypeValidator,
 } from "@nestjs/common";
+import { Throttle, minutes, hours } from "@nestjs/throttler";
 import { FileInterceptor } from "@nestjs/platform-express";
 import {
   ApiBadRequestResponse,
@@ -56,6 +57,7 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post("register")
+  @Throttle({ default: { limit: 10, ttl: hours(1) } })
   @ApiOperation({ summary: "Register a new user" })
   @ApiBody({ type: RegisterDto })
   @ApiCreatedResponse({
@@ -75,6 +77,7 @@ export class AuthController {
   }
 
   @Post("send-verification-code")
+  @Throttle({ default: { limit: 3, ttl: hours(1) } })
   @HttpCode(200)
   @ApiOperation({ summary: "Send a verification code to the email" })
   @ApiBody({ type: SendVerificationCodeDto })
@@ -101,6 +104,7 @@ export class AuthController {
   }
 
   @Post("request-password-reset")
+  @Throttle({ default: { limit: 3, ttl: hours(1) } })
   @HttpCode(200)
   @ApiOperation({ summary: "Send a password reset code if the account exists" })
   @ApiBody({ type: RequestPasswordResetDto })
@@ -121,6 +125,7 @@ export class AuthController {
   }
 
   @Post("login")
+  @Throttle({ default: { limit: 5, ttl: minutes(15) } })
   @HttpCode(200)
   @ApiOperation({ summary: "Login with email and password" })
   @ApiBody({ type: LoginDto })

@@ -21,10 +21,11 @@ import { validateEnvironment } from "./config/env.validation.js";
       useFactory: (configService: ConfigService) => ({
         throttlers: [
           {
-            ttl: Number(configService.get<string>("RATE_LIMIT_TTL")) || 60,
-            limit: Number(configService.get<string>("RATE_LIMIT_LIMIT")) || 120,
+            ttl: (Number(configService.get<string>("RATE_LIMIT_TTL")) || 60) * 1000,
+            limit: Number(configService.get<string>("RATE_LIMIT_LIMIT")) || 5,
           },
         ],
+        errorMessage: "Too many attempts. Please try again in 15 minutes.",
       }),
     }),
     PrismaModule,

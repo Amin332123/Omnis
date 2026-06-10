@@ -36,14 +36,14 @@ export type UploadedReferenceImage = {
 };
 
 @ApiTags("generations")
-@ApiBearerAuth()
-@UseGuards(JwtAuthGuard, EmailVerifiedGuard)
 @Controller("generations")
 export class GenerationsController {
   constructor(private readonly generationsService: GenerationsService) {}
 
   @Post("image")
   @HttpCode(200)
+  @UseGuards(JwtAuthGuard, EmailVerifiedGuard)
+  @ApiBearerAuth()
   @UseInterceptors(
     FileInterceptor("referenceImage", {
       limits: { fileSize: MAX_REFERENCE_IMAGE_BYTES, files: 1 },
@@ -78,6 +78,8 @@ export class GenerationsController {
   }
 
   @Get("history")
+  @UseGuards(JwtAuthGuard, EmailVerifiedGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: "Get generation history" })
   @ApiResponse({
     status: 200,
@@ -88,6 +90,8 @@ export class GenerationsController {
   }
 
   @Get("stats")
+  @UseGuards(JwtAuthGuard, EmailVerifiedGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: "Get generation stats" })
   @ApiResponse({
     status: 200,
@@ -95,5 +99,15 @@ export class GenerationsController {
   })
   getStats(@Req() req: { user: AuthenticatedUser }) {
     return this.generationsService.getStats(req.user.id);
+  }
+
+  @Get("public")
+  @ApiOperation({ summary: "Get featured public generations for the landing page" })
+  @ApiResponse({
+    status: 200,
+    description: "Recent completed generations (public).",
+  })
+  getPublic() {
+    return this.generationsService.getPublic();
   }
 }

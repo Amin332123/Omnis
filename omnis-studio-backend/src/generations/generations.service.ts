@@ -177,6 +177,21 @@ export class GenerationsService {
     })
   }
 
+  async getPublic() {
+    return this.prisma.generationJob.findMany({
+      where: { status: "completed", imageUrl: { not: null } },
+      orderBy: { createdAt: "desc" },
+      take: 12,
+      select: {
+        id: true,
+        imageUrl: true,
+        prompt: true,
+        model: true,
+        createdAt: true,
+      },
+    });
+  }
+
   async getStats(userId: string) {
     const [user, totalGenerations, totalImages] = await Promise.all([
       this.prisma.user.findUnique({

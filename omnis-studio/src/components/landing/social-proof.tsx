@@ -1,16 +1,15 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
-import { Image, Sparkles, Mountain, Cat, Palette, Music } from "lucide-react"
+import { Image, Loader2 } from "lucide-react"
 
-const images = [
-  { icon: Mountain, label: "Mountain landscape", gradient: "from-violet-500 to-purple-600" },
-  { icon: Cat, label: "Cyberpunk cat", gradient: "from-blue-500 to-cyan-500" },
-  { icon: Palette, label: "Abstract art", gradient: "from-rose-500 to-pink-600" },
-  { icon: Sparkles, label: "Fantasy castle", gradient: "from-amber-500 to-orange-600" },
-  { icon: Image, label: "Portrait", gradient: "from-emerald-500 to-teal-600" },
-  { icon: Music, label: "Album cover", gradient: "from-indigo-500 to-violet-600" },
-]
+interface PublicGeneration {
+  id: string
+  imageUrl: string
+  prompt: string
+  model: string
+}
 
 const testimonials = [
   {
@@ -50,7 +49,27 @@ const itemVariants = {
   },
 }
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") ?? ""
+
 export function SocialProof() {
+  const [generations, setGenerations] = useState<PublicGeneration[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const controller = new AbortController()
+    setLoading(true)
+
+    fetch(`${API_BASE}/generations/public`, { signal: controller.signal })
+      .then((res) => (res.ok ? res.json() : Promise.reject()))
+      .then((data) => {
+        if (Array.isArray(data)) setGenerations(data.slice(0, 6))
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false))
+
+    return () => controller.abort()
+  }, [])
+
   return (
     <section id="social-proof" className="py-24 sm:py-32 bg-secondary/50">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -76,22 +95,47 @@ export function SocialProof() {
           viewport={{ once: true, margin: "-100px" }}
           className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-20"
         >
-          {images.map((image) => (
-            <motion.div
-              key={image.label}
-              variants={itemVariants}
-              whileHover={{ scale: 1.03, y: -4 }}
-              className="relative group aspect-square rounded-xl overflow-hidden cursor-pointer"
-            >
-              <div className={`absolute inset-0 bg-gradient-to-br ${image.gradient} opacity-80 group-hover:opacity-100 transition-opacity duration-300`} />
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-white">
-                <image.icon className="h-10 w-10 drop-shadow-lg" />
-                <span className="text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  {image.label}
-                </span>
-              </div>
-            </motion.div>
-          ))}
+          {loading
+            ? Array.from({ length: 6 }).map((_, i) => (
+                <motion.div
+                  key={i}
+                  variants={itemVariants}
+                  className="aspect-square rounded-xl overflow-hidden bg-card border border-border flex items-center justify-center"
+                >
+                  <Loader2 className="h-6 w-6 animate-spin text-muted" />
+                </motion.div>
+              ))
+            : generations.length > 0
+              ? generations.map((gen) => (
+                  <motion.div
+                    key={gen.id}
+                    variants={itemVariants}
+                    whileHover={{ scale: 1.03, y: -4 }}
+                    className="relative group aspect-square rounded-xl overflow-hidden cursor-pointer bg-card"
+                  >
+                    <img
+                      src={gen.imageUrl}
+                      alt={gen.prompt}
+                      loading="lazy"
+                      className="absolute inset-0 w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <div className="absolute bottom-0 left-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <p className="text-xs text-white/90 leading-tight line-clamp-2">
+                        {gen.prompt}
+                      </p>
+                    </div>
+                  </motion.div>
+                ))
+              : Array.from({ length: 6 }).map((_, i) => (
+                  <motion.div
+                    key={i}
+                    variants={itemVariants}
+                    className="aspect-square rounded-xl overflow-hidden bg-card border border-border flex items-center justify-center"
+                  >
+                    <Image className="h-8 w-8 text-muted" />
+                  </motion.div>
+                ))}
         </motion.div>
 
         <motion.div

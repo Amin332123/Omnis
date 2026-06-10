@@ -51,6 +51,42 @@ const itemVariants = {
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") ?? ""
 
+function PublicGenerationCard({ generation }: { generation: PublicGeneration }) {
+  const [hasImageError, setHasImageError] = useState(false)
+
+  return (
+    <motion.a
+      href={generation.imageUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      variants={itemVariants}
+      whileHover={{ y: -4 }}
+      className="relative group block aspect-square rounded-xl overflow-hidden border border-border bg-card cursor-pointer"
+    >
+      {hasImageError ? (
+        <div className="absolute inset-0 flex items-center justify-center bg-card">
+          <Image className="h-8 w-8 text-muted" />
+        </div>
+      ) : (
+        <img
+          src={generation.imageUrl}
+          alt={generation.prompt}
+          loading="lazy"
+          referrerPolicy="no-referrer"
+          className="absolute inset-0 h-full w-full object-cover opacity-100"
+          onError={() => setHasImageError(true)}
+        />
+      )}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+      <div className="absolute bottom-0 left-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+        <p className="text-xs text-white/90 leading-tight line-clamp-2">
+          {generation.prompt}
+        </p>
+      </div>
+    </motion.a>
+  )
+}
+
 export function SocialProof() {
   const [generations, setGenerations] = useState<PublicGeneration[]>([])
   const [loading, setLoading] = useState(true)
@@ -90,8 +126,8 @@ export function SocialProof() {
 
         <motion.div
           variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
+          initial={false}
+          animate="visible"
           viewport={{ once: true, margin: "-100px" }}
           className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-20"
         >
@@ -106,33 +142,7 @@ export function SocialProof() {
                 </motion.div>
               ))
             : generations.length > 0
-              ? generations.map((gen) => (
-                  <motion.div
-                    key={gen.id}
-                    variants={itemVariants}
-                    whileHover={{ y: -4 }}
-                    className="relative group rounded-xl overflow-hidden cursor-pointer"
-                  >
-                    <div className="aspect-square">
-                      <img
-                        src={gen.imageUrl}
-                        alt={gen.prompt}
-                        loading="lazy"
-                        referrerPolicy="no-referrer"
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).style.display = "none"
-                        }}
-                      />
-                    </div>
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-xl" />
-                    <div className="absolute bottom-0 left-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-                      <p className="text-xs text-white/90 leading-tight line-clamp-2">
-                        {gen.prompt}
-                      </p>
-                    </div>
-                  </motion.div>
-                ))
+              ? generations.map((gen) => <PublicGenerationCard key={gen.id} generation={gen} />)
               : Array.from({ length: 6 }).map((_, i) => (
                   <motion.div
                     key={i}

@@ -110,6 +110,15 @@ export type AdminGeneration = {
   }
 }
 
+export type PreferredHomepageSlot = {
+  slot: number
+  generation: AdminGeneration | null
+}
+
+export type PreferredHomepageContentResponse = {
+  slots: PreferredHomepageSlot[]
+}
+
 export type AdminGenerationsListResponse = {
   page: number
   pageSize: number
@@ -136,3 +145,17 @@ export const getAdminGenerations = (params: ListAllGenerationsParams) => {
   if (params.userId) q.set("userId", params.userId)
   return apiFetch<AdminGenerationsListResponse>(`/admin/generations?${q.toString()}`)
 }
+
+export const getPreferredHomepageContent = () =>
+  apiFetch<PreferredHomepageContentResponse>("/admin/preferred-content")
+
+export const setPreferredHomepageContent = (slot: number, generationId: string) =>
+  apiFetch<PreferredHomepageContentResponse>(`/admin/preferred-content/${encodeURIComponent(slot)}`, {
+    method: "PATCH",
+    body: { generationId },
+  })
+
+export const clearPreferredHomepageContent = (slot: number) =>
+  apiFetch<PreferredHomepageContentResponse>(`/admin/preferred-content/${encodeURIComponent(slot)}`, {
+    method: "DELETE",
+  })

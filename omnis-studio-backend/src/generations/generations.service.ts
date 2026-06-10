@@ -28,6 +28,14 @@ const IMAGE_TYPE = "image"
 const IMAGE_STATUS = "completed"
 const MAX_REFERENCE_GUIDANCE_LENGTH = 700
 
+type PublicGenerationRow = {
+  id: string
+  image_url: string | null
+  prompt: string
+  model: string
+  created_at: Date
+}
+
 type ReferenceImageUpload = {
   buffer: Buffer
   mimetype: string
@@ -178,8 +186,33 @@ export class GenerationsService {
   }
 
   async getPublic() {
+    const preferred = await this.prisma.$queryRaw<PublicGenerationRow[]>`
+      SELECT
+        g.id,
+        g.output_url AS image_url,
+        g.prompt,
+        g.model,
+        g.created_at
+      FROM preferred_homepage_generations p
+      INNER JOIN generation_jobs g ON g.id = p.generation_id
+      WHERE g.type = 'image'
+        AND g.status = 'completed'
+        AND g.output_url IS NOT NULL
+      ORDER BY p.slot ASC
+    `
+
+    if (preferred.length > 0) {
+      return preferred.map((generation) => ({
+        id: generation.id,
+        imageUrl: generation.image_url,
+        prompt: generation.prompt,
+        model: generation.model,
+        createdAt: generation.created_at,
+      }))
+    }
+
     return this.prisma.generationJob.findMany({
-      where: { status: "completed", imageUrl: { not: null } },
+      where: { type: IMAGE_TYPE, status: "completed", imageUrl: { not: null } },
       orderBy: { createdAt: "desc" },
       take: 12,
       select: {

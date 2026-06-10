@@ -16,14 +16,22 @@ import {
   Users,
   Loader2,
   Check,
+  Star,
+  X,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react"
 import { useAuth } from "@/context/auth-context"
-import { getAdminGenerations } from "@/lib/admin-api"
+import {
+  clearPreferredHomepageContent,
+  getAdminGenerations,
+  getPreferredHomepageContent,
+  setPreferredHomepageContent,
+} from "@/lib/admin-api"
 import type {
   AdminGeneration,
   ListAllGenerationsParams,
+  PreferredHomepageSlot,
 } from "@/lib/admin-api"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -68,10 +76,13 @@ export default function AdminMediaPage() {
   const { user, isLoading } = useAuth()
 
   const [generations, setGenerations] = useState<AdminGeneration[]>([])
+  const [preferredSlots, setPreferredSlots] = useState<PreferredHomepageSlot[]>([])
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(1)
   const [pageSize] = useState(20)
   const [isLoadingGenerations, setIsLoadingGenerations] = useState(false)
+  const [savingSlot, setSavingSlot] = useState<number | null>(null)
+  const [homepageError, setHomepageError] = useState<string | null>(null)
 
   // Filters
   const [searchQuery, setSearchQuery] = useState("")
@@ -100,8 +111,12 @@ export default function AdminMediaPage() {
       if (statusFilter !== "all") params.status = statusFilter as "completed" | "processing" | "failed"
       if (searchQuery.trim()) params.search = searchQuery.trim()
 
-      const data = await getAdminGenerations(params)
+      const [data, homepageContent] = await Promise.all([
+        getAdminGenerations(params),
+        getPreferredHomepageContent(),
+      ])
       setGenerations(data.generations)
+      setPreferredSlots(homepageContent.slots)
       setTotal(data.total)
     } finally {
       setIsLoadingGenerations(false)
@@ -109,10 +124,51 @@ export default function AdminMediaPage() {
   }, [user?.isAdmin, page, pageSize, typeFilter, statusFilter, searchQuery])
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void fetchGenerations()
   }, [fetchGenerations])
 
   const totalPages = Math.max(1, Math.ceil(total / pageSize))
+
+  const preferredSlotByGenerationId = useMemo(() => {
+    const slots = new Map<string, number>()
+    for (const item of preferredSlots) {
+      if (item.generation) slots.set(item.generation.id, item.slot)
+    }
+    return slots
+  }, [preferredSlots])
+
+  const selectedHomepageCount = preferredSlots.filter((slot) => slot.generation).length
+
+  const canFeatureGeneration = (gen: AdminGeneration) =>
+    gen.type === "image" && gen.status === "completed" && Boolean(gen.imageUrl)
+
+  const updatePreferredSlots = (data: { slots: PreferredHomepageSlot[] }) => {
+    setPreferredSlots(data.slots)
+    setHomepageError(null)
+  }
+
+  const handleSetHomepageSlot = async (slot: number, generationId: string) => {
+    setSavingSlot(slot)
+    try {
+      updatePreferredSlots(await setPreferredHomepageContent(slot, generationId))
+    } catch (error) {
+      setHomepageError(error instanceof Error ? error.message : "Could not update homepage images.")
+    } finally {
+      setSavingSlot(null)
+    }
+  }
+
+  const handleClearHomepageSlot = async (slot: number) => {
+    setSavingSlot(slot)
+    try {
+      updatePreferredSlots(await clearPreferredHomepageContent(slot))
+    } catch (error) {
+      setHomepageError(error instanceof Error ? error.message : "Could not clear homepage slot.")
+    } finally {
+      setSavingSlot(null)
+    }
+  }
 
   const handleView = (gen: AdminGeneration) => {
     setSelectedGeneration(gen)
@@ -234,6 +290,25 @@ export default function AdminMediaPage() {
               {new Set(generations.map((g) => g.user.id)).size}
             </strong> users
           </span>
+          <span className="flex items-center gap-1.5">
+            <Star className="h-3.5 w-3.5" />
+            <strong className="text-foreground">{selectedHomepageCount}/6</strong> homepage slots selected
+          </span>
+        </div>
+      )}
+
+      {homepageError && (
+        <div className="flex items-center justify-between gap-3 rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+          <span>{homepageError}</span>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="h-7 px-2 text-destructive hover:text-destructive"
+            onClick={() => setHomepageError(null)}
+          >
+            <X className="h-4 w-4" />
+          </Button>
         </div>
       )}
 
@@ -275,15 +350,19 @@ export default function AdminMediaPage() {
             exit={{ opacity: 0 }}
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
           >
-            {generations.map((gen, index) => (
-              <motion.div
-                key={gen.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: index * 0.03 }}
-                whileHover={{ y: -2 }}
-                className="group rounded-xl border border-border bg-card overflow-hidden transition-colors hover:border-accent/30"
-              >
+            {generations.map((gen, index) => {
+              const featuredSlot = preferredSlotByGenerationId.get(gen.id)
+              const canFeature = canFeatureGeneration(gen)
+
+              return (
+                <motion.div
+                  key={gen.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: index * 0.03 }}
+                  whileHover={{ y: -2 }}
+                  className="group rounded-xl border border-border bg-card overflow-hidden transition-colors hover:border-accent/30"
+                >
                 <div className="aspect-video relative overflow-hidden bg-secondary">
                   {gen.type === "video" && gen.imageUrl ? (
                     <video
@@ -339,6 +418,15 @@ export default function AdminMediaPage() {
                     </Badge>
                   </div>
 
+                  {featuredSlot && (
+                    <div className="absolute bottom-3 left-3">
+                      <Badge className="bg-accent text-accent-foreground border-0 gap-1">
+                        <Star className="h-3 w-3" />
+                        Home {featuredSlot}
+                      </Badge>
+                    </div>
+                  )}
+
                   <div className="absolute top-3 right-3">
                     <Badge
                       variant="secondary"
@@ -371,7 +459,59 @@ export default function AdminMediaPage() {
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-2 pt-2 border-t border-border">
+                  <div className="space-y-2 pt-2 border-t border-border">
+                    <div className="flex items-center gap-2">
+                      <Select
+                        value={featuredSlot ? String(featuredSlot) : "none"}
+                        onValueChange={(value) => {
+                          if (value === "none") {
+                            if (featuredSlot) void handleClearHomepageSlot(featuredSlot)
+                            return
+                          }
+                          void handleSetHomepageSlot(Number(value), gen.id)
+                        }}
+                        disabled={!canFeature || savingSlot !== null}
+                      >
+                        <SelectTrigger className="h-8 flex-1 text-xs">
+                          <SelectValue placeholder="Home slot" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">Not on home</SelectItem>
+                          {Array.from({ length: 6 }).map((_, i) => {
+                            const slot = i + 1
+                            const slotGeneration = preferredSlots.find((item) => item.slot === slot)?.generation
+                            const label = slotGeneration && slotGeneration.id !== gen.id
+                              ? `Slot ${slot} - replace`
+                              : `Slot ${slot}`
+
+                            return (
+                              <SelectItem key={slot} value={String(slot)}>
+                                {label}
+                              </SelectItem>
+                            )
+                          })}
+                        </SelectContent>
+                      </Select>
+
+                      {featuredSlot && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0"
+                          onClick={() => void handleClearHomepageSlot(featuredSlot)}
+                          disabled={savingSlot !== null}
+                          title="Clear homepage slot"
+                        >
+                          {savingSlot === featuredSlot ? (
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          ) : (
+                            <X className="h-3.5 w-3.5" />
+                          )}
+                        </Button>
+                      )}
+                    </div>
+
+                    <div className="flex items-center gap-2">
                     <Button
                       variant="ghost"
                       size="sm"
@@ -399,10 +539,12 @@ export default function AdminMediaPage() {
                       <Download className="h-3 w-3" />
                       Download
                     </Button>
+                    </div>
                   </div>
                 </div>
               </motion.div>
-            ))}
+              )
+            })}
           </motion.div>
         )}
       </AnimatePresence>

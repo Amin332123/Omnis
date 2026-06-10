@@ -12,6 +12,11 @@ export const creditPacks: CreditPack[] = [
     name: "Starter Pack",
     price: 29,
     credits: 100,
+    features: [
+      "~200 images (Schnell) or ~80 images (GPT Mini)",
+      "~6 five-second videos",
+      "Access to all models & quality tiers",
+    ],
   },
   {
     id: "pro",
@@ -19,12 +24,22 @@ export const creditPacks: CreditPack[] = [
     price: 79,
     credits: 350,
     popular: true,
+    features: [
+      "~700 images (Schnell) or ~290 images (Dev)",
+      "~23 five-second videos or ~14 ten-second videos",
+      "Access to all models & quality tiers",
+    ],
   },
   {
     id: "pro-max",
     name: "Pro Max Pack",
     price: 149,
     credits: 800,
+    features: [
+      "~1,600 images (Schnell) or ~660 images (Dev)",
+      "~53 five-second videos or ~32 ten-second videos",
+      "Access to all models & quality tiers",
+    ],
   },
 ]
 

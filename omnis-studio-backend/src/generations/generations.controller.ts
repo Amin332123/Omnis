@@ -3,6 +3,7 @@ import {
   Body,
   Controller,
   Get,
+  Header,
   HttpCode,
   Post,
   Req,
@@ -102,6 +103,7 @@ export class GenerationsController {
   }
 
   @Get("public")
+  @Header("Cache-Control", "public, max-age=30")
   @ApiOperation({ summary: "Get featured public generations for the landing page" })
   @ApiResponse({
     status: 200,

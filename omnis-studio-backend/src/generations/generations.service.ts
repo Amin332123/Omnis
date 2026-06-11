@@ -71,6 +71,8 @@ export type GenerationProviderMeta = {
 @Injectable()
 export class GenerationsService {
   private readonly logger = new Logger(GenerationsService.name)
+  private publicCache: { data: unknown; expiry: number } = { data: null, expiry: 0 }
+  private readonly PUBLIC_CACHE_TTL = 30 * 1000
 
   constructor(
     private readonly prisma: PrismaService,
@@ -186,6 +188,10 @@ export class GenerationsService {
   }
 
   async getPublic() {
+    if (this.publicCache.data && Date.now() < this.publicCache.expiry) {
+      return this.publicCache.data
+    }
+
     const preferred = await this.prisma.$queryRaw<PublicGenerationRow[]>`
       SELECT
         g.id,
@@ -201,28 +207,32 @@ export class GenerationsService {
       ORDER BY p.slot ASC
     `
 
+    let result
     if (preferred.length > 0) {
-      return preferred.map((generation) => ({
+      result = preferred.map((generation) => ({
         id: generation.id,
         imageUrl: generation.image_url,
         prompt: generation.prompt,
         model: generation.model,
         createdAt: generation.created_at,
       }))
+    } else {
+      result = await this.prisma.generationJob.findMany({
+        where: { type: IMAGE_TYPE, status: "completed", imageUrl: { not: null } },
+        orderBy: { createdAt: "desc" },
+        take: 12,
+        select: {
+          id: true,
+          imageUrl: true,
+          prompt: true,
+          model: true,
+          createdAt: true,
+        },
+      });
     }
 
-    return this.prisma.generationJob.findMany({
-      where: { type: IMAGE_TYPE, status: "completed", imageUrl: { not: null } },
-      orderBy: { createdAt: "desc" },
-      take: 12,
-      select: {
-        id: true,
-        imageUrl: true,
-        prompt: true,
-        model: true,
-        createdAt: true,
-      },
-    });
+    this.publicCache = { data: result, expiry: Date.now() + this.PUBLIC_CACHE_TTL }
+    return result
   }
 
   async getStats(userId: string) {

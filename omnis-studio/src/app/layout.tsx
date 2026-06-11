@@ -32,6 +32,9 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        {process.env.NEXT_PUBLIC_API_URL ? (
+          <link rel="preconnect" href={new URL(process.env.NEXT_PUBLIC_API_URL).origin} />
+        ) : null}
         <Providers>{children}</Providers>
       </body>
     </html>

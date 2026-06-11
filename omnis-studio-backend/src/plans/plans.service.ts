@@ -48,6 +48,8 @@ const DEFAULT_PLANS = [
 @Injectable()
 export class PlansService implements OnModuleInit {
   private readonly logger = new Logger(PlansService.name);
+  private cache: { data: unknown; expiry: number } = { data: null, expiry: 0 };
+  private readonly CACHE_TTL = 5 * 60 * 1000;
 
   constructor(private readonly prisma: PrismaService) {}
 
@@ -76,6 +78,7 @@ export class PlansService implements OnModuleInit {
   }
 
   async create(dto: CreatePlanDto) {
+    this.clearCache();
     return this.prisma.plan.create({
       data: {
         name: dto.name,
@@ -96,10 +99,19 @@ export class PlansService implements OnModuleInit {
   }
 
   async findActive() {
-    return this.prisma.plan.findMany({
+    if (this.cache.data && Date.now() < this.cache.expiry) {
+      return this.cache.data;
+    }
+    const data = await this.prisma.plan.findMany({
       where: { active: true },
       orderBy: [{ sortOrder: "asc" }, { price: "asc" }],
     });
+    this.cache = { data, expiry: Date.now() + this.CACHE_TTL };
+    return data;
+  }
+
+  private clearCache() {
+    this.cache = { data: null, expiry: 0 };
   }
 
   async findOne(id: string) {
@@ -109,6 +121,7 @@ export class PlansService implements OnModuleInit {
   }
 
   async update(id: string, dto: UpdatePlanDto) {
+    this.clearCache();
     await this.findOne(id);
     return this.prisma.plan.update({
       where: { id },
@@ -117,6 +130,7 @@ export class PlansService implements OnModuleInit {
   }
 
   async remove(id: string) {
+    this.clearCache();
     await this.findOne(id);
     await this.prisma.plan.delete({ where: { id } });
     return { success: true };

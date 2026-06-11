@@ -7,16 +7,17 @@ import { getPlans, mapPlanToCreditPack } from "@/lib/plans-api"
 import { Loader2 } from "lucide-react"
 import type { CreditPack } from "@/lib/types"
 
-export function Pricing() {
-  const [packs, setPacks] = useState<CreditPack[]>([])
-  const [loading, setLoading] = useState(true)
+export function Pricing({ initialPlans }: { initialPlans?: CreditPack[] | null }) {
+  const [packs, setPacks] = useState<CreditPack[]>(initialPlans ?? [])
+  const [loading, setLoading] = useState(!initialPlans)
 
   useEffect(() => {
+    if (initialPlans) return
     getPlans()
       .then((plans) => setPacks(plans.map(mapPlanToCreditPack)))
       .catch(() => {})
       .finally(() => setLoading(false))
-  }, [])
+  }, [initialPlans])
 
   return (
     <section id="pricing" className="py-24 sm:py-32 bg-secondary/50">

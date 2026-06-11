@@ -87,11 +87,12 @@ function PublicGenerationCard({ generation }: { generation: PublicGeneration }) 
   )
 }
 
-export function SocialProof() {
-  const [generations, setGenerations] = useState<PublicGeneration[]>([])
-  const [loading, setLoading] = useState(true)
+export function SocialProof({ initialGenerations }: { initialGenerations?: PublicGeneration[] | null }) {
+  const [generations, setGenerations] = useState<PublicGeneration[]>(initialGenerations ?? [])
+  const [loading, setLoading] = useState(!initialGenerations)
 
   useEffect(() => {
+    if (initialGenerations) return
     const controller = new AbortController()
     setLoading(true)
 
@@ -104,7 +105,7 @@ export function SocialProof() {
       .finally(() => setLoading(false))
 
     return () => controller.abort()
-  }, [])
+  }, [initialGenerations])
 
   return (
     <section id="social-proof" className="py-24 sm:py-32 bg-secondary/50">

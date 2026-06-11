@@ -48,15 +48,15 @@ export function PricingCard({ pack, onSelect, className, selected }: PricingCard
       >
         <div className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-br from-accent/3 via-transparent to-transparent animate-bg-shimmer" />
 
-        {pack.popular && (
-          <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
-            <span className="inline-flex items-center rounded-full bg-accent px-3 py-1 text-xs font-medium text-accent-foreground">
-              Most Popular
-            </span>
-          </div>
-        )}
-
         <div className="relative z-10">
+          {pack.popular && (
+            <div className="flex justify-center -mt-12 mb-4">
+              <span className="inline-flex items-center rounded-full bg-accent px-3 py-1 text-xs font-medium text-accent-foreground shadow-lg shadow-accent/20">
+                Most Popular
+              </span>
+            </div>
+          )}
+
           <div className="mb-6">
             <h3 className="text-lg font-semibold text-foreground mb-1">{pack.name}</h3>
             <div className="flex items-baseline gap-0.5">

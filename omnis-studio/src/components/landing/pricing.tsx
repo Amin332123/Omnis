@@ -52,7 +52,7 @@ export function Pricing() {
                 viewport={{ once: true, margin: "-100px" }}
                 transition={{ duration: 0.4, delay: index * 0.1 }}
               >
-                <PricingCard pack={pack} className={pack.popular ? "scale-[1.05]" : ""} />
+                <PricingCard pack={pack} className={pack.popular ? "py-12" : ""} />
               </motion.div>
             ))
           )}

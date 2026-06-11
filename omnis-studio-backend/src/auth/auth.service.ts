@@ -205,7 +205,7 @@ export class AuthService {
     });
 
     const frontendUrl =
-      this.configService.get<string>("FRONTEND_URL") || "http://localhost:3000";
+      this.configService.get<string>("FRONTEND_URL") || "https://omnis-studio.com";
     const verificationLink = `${frontendUrl}/verify-email?token=${token}`;
 
     try {

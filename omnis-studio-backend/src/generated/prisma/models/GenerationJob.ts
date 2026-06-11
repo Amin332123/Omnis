@@ -249,6 +249,7 @@ export type GenerationJobWhereInput = {
   imageUrl?: Prisma.StringNullableFilter<"GenerationJob"> | string | null
   createdAt?: Prisma.DateTimeFilter<"GenerationJob"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  preferredHomepageSlots?: Prisma.PreferredHomepageGenerationListRelationFilter
 }
 
 export type GenerationJobOrderByWithRelationInput = {
@@ -262,6 +263,7 @@ export type GenerationJobOrderByWithRelationInput = {
   imageUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
+  preferredHomepageSlots?: Prisma.PreferredHomepageGenerationOrderByRelationAggregateInput
 }
 
 export type GenerationJobWhereUniqueInput = Prisma.AtLeast<{
@@ -278,6 +280,7 @@ export type GenerationJobWhereUniqueInput = Prisma.AtLeast<{
   imageUrl?: Prisma.StringNullableFilter<"GenerationJob"> | string | null
   createdAt?: Prisma.DateTimeFilter<"GenerationJob"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  preferredHomepageSlots?: Prisma.PreferredHomepageGenerationListRelationFilter
 }, "id">
 
 export type GenerationJobOrderByWithAggregationInput = {
@@ -322,6 +325,7 @@ export type GenerationJobCreateInput = {
   imageUrl?: string | null
   createdAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutJobsInput
+  preferredHomepageSlots?: Prisma.PreferredHomepageGenerationCreateNestedManyWithoutGenerationInput
 }
 
 export type GenerationJobUncheckedCreateInput = {
@@ -334,6 +338,7 @@ export type GenerationJobUncheckedCreateInput = {
   status: string
   imageUrl?: string | null
   createdAt?: Date | string
+  preferredHomepageSlots?: Prisma.PreferredHomepageGenerationUncheckedCreateNestedManyWithoutGenerationInput
 }
 
 export type GenerationJobUpdateInput = {
@@ -346,6 +351,7 @@ export type GenerationJobUpdateInput = {
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutJobsNestedInput
+  preferredHomepageSlots?: Prisma.PreferredHomepageGenerationUpdateManyWithoutGenerationNestedInput
 }
 
 export type GenerationJobUncheckedUpdateInput = {
@@ -358,6 +364,7 @@ export type GenerationJobUncheckedUpdateInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  preferredHomepageSlots?: Prisma.PreferredHomepageGenerationUncheckedUpdateManyWithoutGenerationNestedInput
 }
 
 export type GenerationJobCreateManyInput = {
@@ -449,6 +456,11 @@ export type GenerationJobSumOrderByAggregateInput = {
   creditsUsed?: Prisma.SortOrder
 }
 
+export type GenerationJobScalarRelationFilter = {
+  is?: Prisma.GenerationJobWhereInput
+  isNot?: Prisma.GenerationJobWhereInput
+}
+
 export type GenerationJobCreateNestedManyWithoutUserInput = {
   create?: Prisma.XOR<Prisma.GenerationJobCreateWithoutUserInput, Prisma.GenerationJobUncheckedCreateWithoutUserInput> | Prisma.GenerationJobCreateWithoutUserInput[] | Prisma.GenerationJobUncheckedCreateWithoutUserInput[]
   connectOrCreate?: Prisma.GenerationJobCreateOrConnectWithoutUserInput | Prisma.GenerationJobCreateOrConnectWithoutUserInput[]
@@ -491,6 +503,20 @@ export type GenerationJobUncheckedUpdateManyWithoutUserNestedInput = {
   deleteMany?: Prisma.GenerationJobScalarWhereInput | Prisma.GenerationJobScalarWhereInput[]
 }
 
+export type GenerationJobCreateNestedOneWithoutPreferredHomepageSlotsInput = {
+  create?: Prisma.XOR<Prisma.GenerationJobCreateWithoutPreferredHomepageSlotsInput, Prisma.GenerationJobUncheckedCreateWithoutPreferredHomepageSlotsInput>
+  connectOrCreate?: Prisma.GenerationJobCreateOrConnectWithoutPreferredHomepageSlotsInput
+  connect?: Prisma.GenerationJobWhereUniqueInput
+}
+
+export type GenerationJobUpdateOneRequiredWithoutPreferredHomepageSlotsNestedInput = {
+  create?: Prisma.XOR<Prisma.GenerationJobCreateWithoutPreferredHomepageSlotsInput, Prisma.GenerationJobUncheckedCreateWithoutPreferredHomepageSlotsInput>
+  connectOrCreate?: Prisma.GenerationJobCreateOrConnectWithoutPreferredHomepageSlotsInput
+  upsert?: Prisma.GenerationJobUpsertWithoutPreferredHomepageSlotsInput
+  connect?: Prisma.GenerationJobWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.GenerationJobUpdateToOneWithWhereWithoutPreferredHomepageSlotsInput, Prisma.GenerationJobUpdateWithoutPreferredHomepageSlotsInput>, Prisma.GenerationJobUncheckedUpdateWithoutPreferredHomepageSlotsInput>
+}
+
 export type GenerationJobCreateWithoutUserInput = {
   id?: string
   type: string
@@ -500,6 +526,7 @@ export type GenerationJobCreateWithoutUserInput = {
   status: string
   imageUrl?: string | null
   createdAt?: Date | string
+  preferredHomepageSlots?: Prisma.PreferredHomepageGenerationCreateNestedManyWithoutGenerationInput
 }
 
 export type GenerationJobUncheckedCreateWithoutUserInput = {
@@ -511,6 +538,7 @@ export type GenerationJobUncheckedCreateWithoutUserInput = {
   status: string
   imageUrl?: string | null
   createdAt?: Date | string
+  preferredHomepageSlots?: Prisma.PreferredHomepageGenerationUncheckedCreateNestedManyWithoutGenerationInput
 }
 
 export type GenerationJobCreateOrConnectWithoutUserInput = {
@@ -554,6 +582,70 @@ export type GenerationJobScalarWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"GenerationJob"> | Date | string
 }
 
+export type GenerationJobCreateWithoutPreferredHomepageSlotsInput = {
+  id?: string
+  type: string
+  prompt: string
+  model: string
+  creditsUsed: number
+  status: string
+  imageUrl?: string | null
+  createdAt?: Date | string
+  user: Prisma.UserCreateNestedOneWithoutJobsInput
+}
+
+export type GenerationJobUncheckedCreateWithoutPreferredHomepageSlotsInput = {
+  id?: string
+  userId: string
+  type: string
+  prompt: string
+  model: string
+  creditsUsed: number
+  status: string
+  imageUrl?: string | null
+  createdAt?: Date | string
+}
+
+export type GenerationJobCreateOrConnectWithoutPreferredHomepageSlotsInput = {
+  where: Prisma.GenerationJobWhereUniqueInput
+  create: Prisma.XOR<Prisma.GenerationJobCreateWithoutPreferredHomepageSlotsInput, Prisma.GenerationJobUncheckedCreateWithoutPreferredHomepageSlotsInput>
+}
+
+export type GenerationJobUpsertWithoutPreferredHomepageSlotsInput = {
+  update: Prisma.XOR<Prisma.GenerationJobUpdateWithoutPreferredHomepageSlotsInput, Prisma.GenerationJobUncheckedUpdateWithoutPreferredHomepageSlotsInput>
+  create: Prisma.XOR<Prisma.GenerationJobCreateWithoutPreferredHomepageSlotsInput, Prisma.GenerationJobUncheckedCreateWithoutPreferredHomepageSlotsInput>
+  where?: Prisma.GenerationJobWhereInput
+}
+
+export type GenerationJobUpdateToOneWithWhereWithoutPreferredHomepageSlotsInput = {
+  where?: Prisma.GenerationJobWhereInput
+  data: Prisma.XOR<Prisma.GenerationJobUpdateWithoutPreferredHomepageSlotsInput, Prisma.GenerationJobUncheckedUpdateWithoutPreferredHomepageSlotsInput>
+}
+
+export type GenerationJobUpdateWithoutPreferredHomepageSlotsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.StringFieldUpdateOperationsInput | string
+  prompt?: Prisma.StringFieldUpdateOperationsInput | string
+  model?: Prisma.StringFieldUpdateOperationsInput | string
+  creditsUsed?: Prisma.FloatFieldUpdateOperationsInput | number
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  user?: Prisma.UserUpdateOneRequiredWithoutJobsNestedInput
+}
+
+export type GenerationJobUncheckedUpdateWithoutPreferredHomepageSlotsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.StringFieldUpdateOperationsInput | string
+  prompt?: Prisma.StringFieldUpdateOperationsInput | string
+  model?: Prisma.StringFieldUpdateOperationsInput | string
+  creditsUsed?: Prisma.FloatFieldUpdateOperationsInput | number
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 export type GenerationJobCreateManyUserInput = {
   id?: string
   type: string
@@ -574,6 +666,7 @@ export type GenerationJobUpdateWithoutUserInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  preferredHomepageSlots?: Prisma.PreferredHomepageGenerationUpdateManyWithoutGenerationNestedInput
 }
 
 export type GenerationJobUncheckedUpdateWithoutUserInput = {
@@ -585,6 +678,7 @@ export type GenerationJobUncheckedUpdateWithoutUserInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  preferredHomepageSlots?: Prisma.PreferredHomepageGenerationUncheckedUpdateManyWithoutGenerationNestedInput
 }
 
 export type GenerationJobUncheckedUpdateManyWithoutUserInput = {
@@ -599,6 +693,35 @@ export type GenerationJobUncheckedUpdateManyWithoutUserInput = {
 }
 
 
+/**
+ * Count Type GenerationJobCountOutputType
+ */
+
+export type GenerationJobCountOutputType = {
+  preferredHomepageSlots: number
+}
+
+export type GenerationJobCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  preferredHomepageSlots?: boolean | GenerationJobCountOutputTypeCountPreferredHomepageSlotsArgs
+}
+
+/**
+ * GenerationJobCountOutputType without action
+ */
+export type GenerationJobCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the GenerationJobCountOutputType
+   */
+  select?: Prisma.GenerationJobCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * GenerationJobCountOutputType without action
+ */
+export type GenerationJobCountOutputTypeCountPreferredHomepageSlotsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PreferredHomepageGenerationWhereInput
+}
+
 
 export type GenerationJobSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -611,6 +734,8 @@ export type GenerationJobSelect<ExtArgs extends runtime.Types.Extensions.Interna
   imageUrl?: boolean
   createdAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  preferredHomepageSlots?: boolean | Prisma.GenerationJob$preferredHomepageSlotsArgs<ExtArgs>
+  _count?: boolean | Prisma.GenerationJobCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["generationJob"]>
 
 export type GenerationJobSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -654,6 +779,8 @@ export type GenerationJobSelectScalar = {
 export type GenerationJobOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "type" | "prompt" | "model" | "creditsUsed" | "status" | "imageUrl" | "createdAt", ExtArgs["result"]["generationJob"]>
 export type GenerationJobInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  preferredHomepageSlots?: boolean | Prisma.GenerationJob$preferredHomepageSlotsArgs<ExtArgs>
+  _count?: boolean | Prisma.GenerationJobCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type GenerationJobIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -666,6 +793,7 @@ export type $GenerationJobPayload<ExtArgs extends runtime.Types.Extensions.Inter
   name: "GenerationJob"
   objects: {
     user: Prisma.$UserPayload<ExtArgs>
+    preferredHomepageSlots: Prisma.$PreferredHomepageGenerationPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1072,6 +1200,7 @@ readonly fields: GenerationJobFieldRefs;
 export interface Prisma__GenerationJobClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  preferredHomepageSlots<T extends Prisma.GenerationJob$preferredHomepageSlotsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.GenerationJob$preferredHomepageSlotsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PreferredHomepageGenerationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1508,6 +1637,30 @@ export type GenerationJobDeleteManyArgs<ExtArgs extends runtime.Types.Extensions
    * Limit how many GenerationJobs to delete.
    */
   limit?: number
+}
+
+/**
+ * GenerationJob.preferredHomepageSlots
+ */
+export type GenerationJob$preferredHomepageSlotsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PreferredHomepageGeneration
+   */
+  select?: Prisma.PreferredHomepageGenerationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PreferredHomepageGeneration
+   */
+  omit?: Prisma.PreferredHomepageGenerationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PreferredHomepageGenerationInclude<ExtArgs> | null
+  where?: Prisma.PreferredHomepageGenerationWhereInput
+  orderBy?: Prisma.PreferredHomepageGenerationOrderByWithRelationInput | Prisma.PreferredHomepageGenerationOrderByWithRelationInput[]
+  cursor?: Prisma.PreferredHomepageGenerationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PreferredHomepageGenerationScalarFieldEnum | Prisma.PreferredHomepageGenerationScalarFieldEnum[]
 }
 
 /**

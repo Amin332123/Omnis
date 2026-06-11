@@ -29,11 +29,13 @@ export type AggregatePlan = {
 export type PlanAvgAggregateOutputType = {
   credits: number | null
   price: number | null
+  sortOrder: number | null
 }
 
 export type PlanSumAggregateOutputType = {
   credits: number | null
   price: number | null
+  sortOrder: number | null
 }
 
 export type PlanMinAggregateOutputType = {
@@ -43,6 +45,7 @@ export type PlanMinAggregateOutputType = {
   price: number | null
   popular: boolean | null
   active: boolean | null
+  sortOrder: number | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -54,6 +57,7 @@ export type PlanMaxAggregateOutputType = {
   price: number | null
   popular: boolean | null
   active: boolean | null
+  sortOrder: number | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -66,6 +70,7 @@ export type PlanCountAggregateOutputType = {
   features: number
   popular: number
   active: number
+  sortOrder: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -75,11 +80,13 @@ export type PlanCountAggregateOutputType = {
 export type PlanAvgAggregateInputType = {
   credits?: true
   price?: true
+  sortOrder?: true
 }
 
 export type PlanSumAggregateInputType = {
   credits?: true
   price?: true
+  sortOrder?: true
 }
 
 export type PlanMinAggregateInputType = {
@@ -89,6 +96,7 @@ export type PlanMinAggregateInputType = {
   price?: true
   popular?: true
   active?: true
+  sortOrder?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -100,6 +108,7 @@ export type PlanMaxAggregateInputType = {
   price?: true
   popular?: true
   active?: true
+  sortOrder?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -112,6 +121,7 @@ export type PlanCountAggregateInputType = {
   features?: true
   popular?: true
   active?: true
+  sortOrder?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -211,6 +221,7 @@ export type PlanGroupByOutputType = {
   features: runtime.JsonValue
   popular: boolean
   active: boolean
+  sortOrder: number
   createdAt: Date
   updatedAt: Date
   _count: PlanCountAggregateOutputType | null
@@ -246,6 +257,7 @@ export type PlanWhereInput = {
   features?: Prisma.JsonFilter<"Plan">
   popular?: Prisma.BoolFilter<"Plan"> | boolean
   active?: Prisma.BoolFilter<"Plan"> | boolean
+  sortOrder?: Prisma.IntFilter<"Plan"> | number
   createdAt?: Prisma.DateTimeFilter<"Plan"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Plan"> | Date | string
 }
@@ -258,6 +270,7 @@ export type PlanOrderByWithRelationInput = {
   features?: Prisma.SortOrder
   popular?: Prisma.SortOrder
   active?: Prisma.SortOrder
+  sortOrder?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -273,6 +286,7 @@ export type PlanWhereUniqueInput = Prisma.AtLeast<{
   features?: Prisma.JsonFilter<"Plan">
   popular?: Prisma.BoolFilter<"Plan"> | boolean
   active?: Prisma.BoolFilter<"Plan"> | boolean
+  sortOrder?: Prisma.IntFilter<"Plan"> | number
   createdAt?: Prisma.DateTimeFilter<"Plan"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Plan"> | Date | string
 }, "id">
@@ -285,6 +299,7 @@ export type PlanOrderByWithAggregationInput = {
   features?: Prisma.SortOrder
   popular?: Prisma.SortOrder
   active?: Prisma.SortOrder
+  sortOrder?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.PlanCountOrderByAggregateInput
@@ -305,6 +320,7 @@ export type PlanScalarWhereWithAggregatesInput = {
   features?: Prisma.JsonWithAggregatesFilter<"Plan">
   popular?: Prisma.BoolWithAggregatesFilter<"Plan"> | boolean
   active?: Prisma.BoolWithAggregatesFilter<"Plan"> | boolean
+  sortOrder?: Prisma.IntWithAggregatesFilter<"Plan"> | number
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Plan"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Plan"> | Date | string
 }
@@ -317,6 +333,7 @@ export type PlanCreateInput = {
   features?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   popular?: boolean
   active?: boolean
+  sortOrder?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -329,6 +346,7 @@ export type PlanUncheckedCreateInput = {
   features?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   popular?: boolean
   active?: boolean
+  sortOrder?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -341,6 +359,7 @@ export type PlanUpdateInput = {
   features?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   popular?: Prisma.BoolFieldUpdateOperationsInput | boolean
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -353,6 +372,7 @@ export type PlanUncheckedUpdateInput = {
   features?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   popular?: Prisma.BoolFieldUpdateOperationsInput | boolean
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -365,6 +385,7 @@ export type PlanCreateManyInput = {
   features?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   popular?: boolean
   active?: boolean
+  sortOrder?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -377,6 +398,7 @@ export type PlanUpdateManyMutationInput = {
   features?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   popular?: Prisma.BoolFieldUpdateOperationsInput | boolean
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -389,6 +411,7 @@ export type PlanUncheckedUpdateManyInput = {
   features?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   popular?: Prisma.BoolFieldUpdateOperationsInput | boolean
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -401,6 +424,7 @@ export type PlanCountOrderByAggregateInput = {
   features?: Prisma.SortOrder
   popular?: Prisma.SortOrder
   active?: Prisma.SortOrder
+  sortOrder?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -408,6 +432,7 @@ export type PlanCountOrderByAggregateInput = {
 export type PlanAvgOrderByAggregateInput = {
   credits?: Prisma.SortOrder
   price?: Prisma.SortOrder
+  sortOrder?: Prisma.SortOrder
 }
 
 export type PlanMaxOrderByAggregateInput = {
@@ -417,6 +442,7 @@ export type PlanMaxOrderByAggregateInput = {
   price?: Prisma.SortOrder
   popular?: Prisma.SortOrder
   active?: Prisma.SortOrder
+  sortOrder?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -428,6 +454,7 @@ export type PlanMinOrderByAggregateInput = {
   price?: Prisma.SortOrder
   popular?: Prisma.SortOrder
   active?: Prisma.SortOrder
+  sortOrder?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -435,6 +462,7 @@ export type PlanMinOrderByAggregateInput = {
 export type PlanSumOrderByAggregateInput = {
   credits?: Prisma.SortOrder
   price?: Prisma.SortOrder
+  sortOrder?: Prisma.SortOrder
 }
 
 export type StringFieldUpdateOperationsInput = {
@@ -475,6 +503,7 @@ export type PlanSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   features?: boolean
   popular?: boolean
   active?: boolean
+  sortOrder?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["plan"]>
@@ -487,6 +516,7 @@ export type PlanSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   features?: boolean
   popular?: boolean
   active?: boolean
+  sortOrder?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["plan"]>
@@ -499,6 +529,7 @@ export type PlanSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   features?: boolean
   popular?: boolean
   active?: boolean
+  sortOrder?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["plan"]>
@@ -511,11 +542,12 @@ export type PlanSelectScalar = {
   features?: boolean
   popular?: boolean
   active?: boolean
+  sortOrder?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type PlanOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "credits" | "price" | "features" | "popular" | "active" | "createdAt" | "updatedAt", ExtArgs["result"]["plan"]>
+export type PlanOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "credits" | "price" | "features" | "popular" | "active" | "sortOrder" | "createdAt" | "updatedAt", ExtArgs["result"]["plan"]>
 
 export type $PlanPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Plan"
@@ -528,6 +560,7 @@ export type $PlanPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     features: runtime.JsonValue
     popular: boolean
     active: boolean
+    sortOrder: number
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["plan"]>
@@ -960,6 +993,7 @@ export interface PlanFieldRefs {
   readonly features: Prisma.FieldRef<"Plan", 'Json'>
   readonly popular: Prisma.FieldRef<"Plan", 'Boolean'>
   readonly active: Prisma.FieldRef<"Plan", 'Boolean'>
+  readonly sortOrder: Prisma.FieldRef<"Plan", 'Int'>
   readonly createdAt: Prisma.FieldRef<"Plan", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Plan", 'DateTime'>
 }

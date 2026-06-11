@@ -32,4 +32,9 @@ export class CreatePlanDto {
   @IsOptional()
   @IsBoolean()
   active?: boolean;
+
+  @ApiPropertyOptional({ example: 1, description: "Sort order for display (lower = first)" })
+  @IsOptional()
+  @IsInt()
+  sortOrder?: number;
 }

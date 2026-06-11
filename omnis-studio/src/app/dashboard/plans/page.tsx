@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
-import { Package, Plus, Pencil, Trash2, RefreshCw, X, Sparkles } from "lucide-react"
+import { Package, Plus, Pencil, Trash2, RefreshCw, X, Sparkles, ArrowUp, ArrowDown } from "lucide-react"
 
 import { useAuth } from "@/context/auth-context"
 import { getAllPlans, createPlan, updatePlan, deletePlan, type PlanResponse } from "@/lib/plans-api"
@@ -117,6 +117,44 @@ export default function PlansPage() {
     } finally {
       setIsSaving(false)
     }
+  }
+
+  const movePlan = async (index: number, direction: "up" | "down") => {
+    const targetIndex = direction === "up" ? index - 1 : index + 1
+    if (targetIndex < 0 || targetIndex >= plans.length) return
+
+    const current = plans[index]
+    const target = plans[targetIndex]
+
+    try {
+      await Promise.all([
+        updatePlan(current.id, { sortOrder: target.sortOrder }),
+        updatePlan(target.id, { sortOrder: current.sortOrder }),
+      ])
+      showSuccessToast(`Plan moved ${direction}`)
+      await loadPlans()
+    } catch (err) {
+      const message = getApiErrorMessage(err, "Failed to reorder plan.")
+      const isDark = document.documentElement.classList.contains("dark")
+      await Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: message,
+        background: isDark ? "#18181B" : "#ffffff",
+        color: isDark ? "#FAFAFA" : "#111827",
+        confirmButtonColor: "#6366f1",
+      })
+    }
+  }
+
+  const moveFeature = (i: number, direction: "up" | "down") => {
+    const targetIndex = direction === "up" ? i - 1 : i + 1
+    if (targetIndex < 0 || targetIndex >= form.features.length) return
+    setForm((f) => {
+      const next = [...f.features]
+      ;[next[i], next[targetIndex]] = [next[targetIndex], next[i]]
+      return { ...f, features: next }
+    })
   }
 
   const handleDelete = async (plan: PlanResponse) => {
@@ -241,7 +279,25 @@ export default function PlansPage() {
                         </div>
                       )}
                     </div>
-                    <div className="flex items-center gap-2 shrink-0">
+                    <div className="flex items-center gap-1 shrink-0">
+                      <div className="flex flex-col gap-0.5 mr-1">
+                        <button
+                          className="h-5 w-5 flex items-center justify-center rounded hover:bg-muted/50 text-muted disabled:opacity-20"
+                          onClick={() => void movePlan(plans.indexOf(plan), "up")}
+                          disabled={plans.indexOf(plan) === 0}
+                          title="Move up"
+                        >
+                          <ArrowUp className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          className="h-5 w-5 flex items-center justify-center rounded hover:bg-muted/50 text-muted disabled:opacity-20"
+                          onClick={() => void movePlan(plans.indexOf(plan), "down")}
+                          disabled={plans.indexOf(plan) === plans.length - 1}
+                          title="Move down"
+                        >
+                          <ArrowDown className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
                       <Button variant="outline" size="sm" className="gap-1.5" onClick={() => openEdit(plan)}>
                         <Pencil className="h-3.5 w-3.5" />
                         Edit
@@ -295,7 +351,25 @@ export default function PlansPage() {
               </div>
               <div className="space-y-2">
                 {form.features.map((feature, i) => (
-                  <div key={i} className="flex items-center gap-2">
+                  <div key={i} className="flex items-center gap-1">
+                    <div className="flex flex-col gap-0.5">
+                      <button
+                        className="h-4 w-4 flex items-center justify-center rounded hover:bg-muted/50 text-muted disabled:opacity-20"
+                        onClick={() => moveFeature(i, "up")}
+                        disabled={i === 0}
+                        title="Move up"
+                      >
+                        <ArrowUp className="h-3 w-3" />
+                      </button>
+                      <button
+                        className="h-4 w-4 flex items-center justify-center rounded hover:bg-muted/50 text-muted disabled:opacity-20"
+                        onClick={() => moveFeature(i, "down")}
+                        disabled={i === form.features.length - 1}
+                        title="Move down"
+                      >
+                        <ArrowDown className="h-3 w-3" />
+                      </button>
+                    </div>
                     <Input
                       value={feature}
                       onChange={(e) => setFeature(i, e.target.value)}

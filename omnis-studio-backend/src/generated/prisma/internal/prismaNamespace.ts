@@ -388,7 +388,8 @@ export const ModelName = {
   VerificationCode: 'VerificationCode',
   EmailVerificationToken: 'EmailVerificationToken',
   User: 'User',
-  GenerationJob: 'GenerationJob'
+  GenerationJob: 'GenerationJob',
+  PreferredHomepageGeneration: 'PreferredHomepageGeneration'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -404,7 +405,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "plan" | "verificationCode" | "emailVerificationToken" | "user" | "generationJob"
+    modelProps: "plan" | "verificationCode" | "emailVerificationToken" | "user" | "generationJob" | "preferredHomepageGeneration"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -778,6 +779,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    PreferredHomepageGeneration: {
+      payload: Prisma.$PreferredHomepageGenerationPayload<ExtArgs>
+      fields: Prisma.PreferredHomepageGenerationFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PreferredHomepageGenerationFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PreferredHomepageGenerationPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PreferredHomepageGenerationFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PreferredHomepageGenerationPayload>
+        }
+        findFirst: {
+          args: Prisma.PreferredHomepageGenerationFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PreferredHomepageGenerationPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PreferredHomepageGenerationFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PreferredHomepageGenerationPayload>
+        }
+        findMany: {
+          args: Prisma.PreferredHomepageGenerationFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PreferredHomepageGenerationPayload>[]
+        }
+        create: {
+          args: Prisma.PreferredHomepageGenerationCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PreferredHomepageGenerationPayload>
+        }
+        createMany: {
+          args: Prisma.PreferredHomepageGenerationCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.PreferredHomepageGenerationCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PreferredHomepageGenerationPayload>[]
+        }
+        delete: {
+          args: Prisma.PreferredHomepageGenerationDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PreferredHomepageGenerationPayload>
+        }
+        update: {
+          args: Prisma.PreferredHomepageGenerationUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PreferredHomepageGenerationPayload>
+        }
+        deleteMany: {
+          args: Prisma.PreferredHomepageGenerationDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PreferredHomepageGenerationUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.PreferredHomepageGenerationUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PreferredHomepageGenerationPayload>[]
+        }
+        upsert: {
+          args: Prisma.PreferredHomepageGenerationUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PreferredHomepageGenerationPayload>
+        }
+        aggregate: {
+          args: Prisma.PreferredHomepageGenerationAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePreferredHomepageGeneration>
+        }
+        groupBy: {
+          args: Prisma.PreferredHomepageGenerationGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PreferredHomepageGenerationGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PreferredHomepageGenerationCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PreferredHomepageGenerationCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -825,6 +900,7 @@ export const PlanScalarFieldEnum = {
   features: 'features',
   popular: 'popular',
   active: 'active',
+  sortOrder: 'sortOrder',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -887,6 +963,16 @@ export const GenerationJobScalarFieldEnum = {
 } as const
 
 export type GenerationJobScalarFieldEnum = (typeof GenerationJobScalarFieldEnum)[keyof typeof GenerationJobScalarFieldEnum]
+
+
+export const PreferredHomepageGenerationScalarFieldEnum = {
+  slot: 'slot',
+  generationId: 'generationId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PreferredHomepageGenerationScalarFieldEnum = (typeof PreferredHomepageGenerationScalarFieldEnum)[keyof typeof PreferredHomepageGenerationScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -1126,6 +1212,7 @@ export type GlobalOmitConfig = {
   emailVerificationToken?: Prisma.EmailVerificationTokenOmit
   user?: Prisma.UserOmit
   generationJob?: Prisma.GenerationJobOmit
+  preferredHomepageGeneration?: Prisma.PreferredHomepageGenerationOmit
 }
 
 /* Types for Logging */

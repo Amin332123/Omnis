@@ -9,36 +9,39 @@ const DEFAULT_PLANS = [
     credits: 100,
     price: 29,
     features: [
-      "~200 images (Schnell) or ~80 images (GPT Mini)",
       "~6 five-second videos",
       "Access to all models & quality tiers",
+      "~200 images (Schnell) or ~80 images (GPT Mini)",
     ],
     popular: false,
     active: true,
+    sortOrder: 1,
   },
   {
     name: "Pro Pack",
     credits: 350,
     price: 79,
     features: [
-      "~700 images (Schnell) or ~290 images (Dev)",
       "~23 five-second videos or ~14 ten-second videos",
       "Access to all models & quality tiers",
+      "~700 images (Schnell) or ~290 images (Dev)",
     ],
     popular: true,
     active: true,
+    sortOrder: 2,
   },
   {
     name: "Pro Max Pack",
     credits: 800,
     price: 149,
     features: [
-      "~1,600 images (Schnell) or ~660 images (Dev)",
       "~53 five-second videos or ~32 ten-second videos",
       "Access to all models & quality tiers",
+      "~1,600 images (Schnell) or ~660 images (Dev)",
     ],
     popular: false,
     active: true,
+    sortOrder: 3,
   },
 ]
 
@@ -64,6 +67,7 @@ export class PlansService implements OnModuleInit {
           features: plan.features as never,
           popular: plan.popular,
           active: plan.active,
+          sortOrder: plan.sortOrder,
         },
       });
     }
@@ -80,20 +84,21 @@ export class PlansService implements OnModuleInit {
         features: (dto.features ?? []) as never,
         popular: dto.popular ?? false,
         active: dto.active ?? true,
+        sortOrder: dto.sortOrder ?? 0,
       },
     });
   }
 
   async findAll() {
     return this.prisma.plan.findMany({
-      orderBy: { price: "asc" },
+      orderBy: [{ sortOrder: "asc" }, { price: "asc" }],
     });
   }
 
   async findActive() {
     return this.prisma.plan.findMany({
       where: { active: true },
-      orderBy: { price: "asc" },
+      orderBy: [{ sortOrder: "asc" }, { price: "asc" }],
     });
   }
 

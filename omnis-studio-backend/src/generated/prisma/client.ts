@@ -66,3 +66,8 @@ export type User = Prisma.UserModel
  * 
  */
 export type GenerationJob = Prisma.GenerationJobModel
+/**
+ * Model PreferredHomepageGeneration
+ * 
+ */
+export type PreferredHomepageGeneration = Prisma.PreferredHomepageGenerationModel

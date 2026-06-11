@@ -9,6 +9,7 @@ export type PlanResponse = {
   features: string[]
   popular: boolean
   active: boolean
+  sortOrder: number
   createdAt: string
   updatedAt: string
 }
@@ -24,6 +25,7 @@ export const createPlan = (data: {
   features?: string[]
   popular?: boolean
   active?: boolean
+  sortOrder?: number
 }) =>
   apiFetch<PlanResponse>("/admin/plans", {
     method: "POST",
@@ -39,6 +41,7 @@ export const updatePlan = (
     features?: string[]
     popular?: boolean
     active?: boolean
+    sortOrder?: number
   },
 ) =>
   apiFetch<PlanResponse>(`/admin/plans/${encodeURIComponent(id)}`, {

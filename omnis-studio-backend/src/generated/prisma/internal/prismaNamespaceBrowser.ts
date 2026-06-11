@@ -55,7 +55,8 @@ export const ModelName = {
   VerificationCode: 'VerificationCode',
   EmailVerificationToken: 'EmailVerificationToken',
   User: 'User',
-  GenerationJob: 'GenerationJob'
+  GenerationJob: 'GenerationJob',
+  PreferredHomepageGeneration: 'PreferredHomepageGeneration'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -82,6 +83,7 @@ export const PlanScalarFieldEnum = {
   features: 'features',
   popular: 'popular',
   active: 'active',
+  sortOrder: 'sortOrder',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -144,6 +146,16 @@ export const GenerationJobScalarFieldEnum = {
 } as const
 
 export type GenerationJobScalarFieldEnum = (typeof GenerationJobScalarFieldEnum)[keyof typeof GenerationJobScalarFieldEnum]
+
+
+export const PreferredHomepageGenerationScalarFieldEnum = {
+  slot: 'slot',
+  generationId: 'generationId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PreferredHomepageGenerationScalarFieldEnum = (typeof PreferredHomepageGenerationScalarFieldEnum)[keyof typeof PreferredHomepageGenerationScalarFieldEnum]
 
 
 export const SortOrder = {

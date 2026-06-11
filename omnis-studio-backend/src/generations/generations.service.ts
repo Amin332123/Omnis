@@ -110,9 +110,20 @@ export class GenerationsService {
       throw new HttpException("Insufficient credits", HttpStatus.PAYMENT_REQUIRED)
     }
 
-    const referenceGuidance = referenceImage
-      ? await this.createReferenceGuidance(prompt, referenceImage)
-      : undefined
+    let referenceDataUrl: string | undefined
+    let referenceGuidance: string | undefined
+
+    if (referenceImage) {
+      this.validateReferenceImage(referenceImage)
+      referenceDataUrl = `data:${referenceImage.mimetype};base64,${referenceImage.buffer.toString("base64")}`
+
+      if (provider === "flux") {
+        const intentBoost = this.buildIdentityPreservationInstruction(prompt)
+        referenceGuidance = intentBoost
+      } else {
+        referenceGuidance = await this.createReferenceGuidance(prompt, referenceImage)
+      }
+    }
 
     const enhancedPrompt = this.buildEnhancedPrompt(prompt, dto, provider, modelKey, referenceGuidance)
 
@@ -122,6 +133,7 @@ export class GenerationsService {
       enhancedPrompt,
       dto.imageSize,
       dto.quality,
+      referenceDataUrl,
     )
 
     const finalModelLabel = modelLabel ?? returnedModel
@@ -353,6 +365,7 @@ export class GenerationsService {
     prompt: string,
     imageSize: string | undefined,
     quality: string | undefined,
+    referenceImageDataUrl?: string,
   ) {
     if (provider === "openai") {
       const size = this.mapOpenAISize(modelKey, imageSize)
@@ -368,6 +381,8 @@ export class GenerationsService {
       prompt,
       model: modelKey,
       imageSize,
+      imageUrl: referenceImageDataUrl,
+      strength: 0.85,
     })
   }
 
@@ -415,11 +430,13 @@ export class GenerationsService {
             ? "high quality Flux Dev generation, refined details, strong composition"
             : "fast professional generation, clear subject, strong visual readability"
 
+    const preservationNote = referenceGuidance
+      ? `IMPORTANT - Reference image instructions: ${referenceGuidance}`
+      : undefined
+
     return [
       prompt,
-      referenceGuidance
-        ? `Reference image inspiration: ${referenceGuidance}`
-        : undefined,
+      preservationNote,
       stylePrompt,
       qualityPrompt,
       modelPrompt,
@@ -429,9 +446,19 @@ export class GenerationsService {
       .join(", ")
   }
 
-  private async createReferenceGuidance(prompt: string, image: ReferenceImageUpload) {
-    this.validateReferenceImage(image)
+  private buildIdentityPreservationInstruction(prompt: string): string {
+    const lower = prompt.toLowerCase()
+    const wantsKeep =
+      /keep|preserve|maintain|don't change|do not change|same|retain|stay|keep.*face|keep.*look/i.test(lower)
 
+    if (wantsKeep) {
+      return "CRITICAL: The user wants to preserve specific aspects from the reference image. Keep the original person's identity, facial structure, features, and expression intact. Only change what the prompt explicitly describes."
+    }
+
+    return "This is a reference image. Preserve the core subject's identity and key facial features unless the prompt explicitly says to change them. Maintain the original composition, lighting mood, and color palette as a foundation."
+  }
+
+  private async createReferenceGuidance(prompt: string, image: ReferenceImageUpload) {
     const dataUrl = `data:${image.mimetype};base64,${image.buffer.toString("base64")}`
     const guidance = await this.openaiService.describeReferenceImage({
       dataUrl,

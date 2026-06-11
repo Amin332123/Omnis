@@ -119,26 +119,37 @@ export class OpenAIService {
     try {
       const response = await this.client.chat.completions.create({
         model: params.model || this.referenceAnalysisModel,
-        temperature: 0.2,
-        max_tokens: 180,
+        temperature: 0.1,
+        max_tokens: 400,
         messages: [
           {
             role: "system",
             content:
-              "You extract visual inspiration from a reference image for image generation. Describe reusable visual traits only: subject cues, composition, camera angle, lighting, palette, materials, mood, and style. Do not identify private people, read hidden text, or mention unsafe attributes. Keep it concise.",
+              "You are an expert image analyst. Given a reference image and a user prompt, describe the image in detail for AI image generation.\n\n" +
+              "YOUR OUTPUT MUST INCLUDE:\n" +
+              "1. FACIAL DETAILS: Face shape, skin tone, eye color/shape, nose, lips, hairstyle/color, facial hair, expression, age range, any distinctive features.\n" +
+              "2. IDENTITY MARKERS: Clothing details, accessories, body type, posture, any identifiable traits.\n" +
+              "3. COMPOSITION: Camera angle, framing, depth of field, subject placement.\n" +
+              "4. LIGHTING & COLOR: Light source, shadows, color palette, mood.\n" +
+              "5. BACKGROUND & SETTING: Environment, props, context.\n\n" +
+              "RULES:\n" +
+              "- Describe EVERYTHING visually. Do not censor or omit facial features.\n" +
+              "- Use neutral objective descriptions.\n" +
+              "- If the user prompt says to change something, note what should stay the same.\n" +
+              "- Output a single detailed paragraph.",
           },
           {
             role: "user",
             content: [
               {
                 type: "text",
-                text: `User prompt: ${params.prompt}\n\nSummarize the reference image as generation guidance in 1 compact paragraph.`,
+                text: `User prompt: "${params.prompt}"\n\nDescribe this reference image in maximum detail so an AI image generator can replicate the subject's identity and key visual traits accurately. Focus especially on facial features, expression, hairstyle, and any details the user wants preserved.`,
               },
               {
                 type: "image_url",
                 image_url: {
                   url: params.dataUrl,
-                  detail: "low",
+                  detail: "high",
                 },
               },
             ],
@@ -147,7 +158,7 @@ export class OpenAIService {
       } as any)
 
       const text = response.choices?.[0]?.message?.content?.trim()
-      return text ? text.slice(0, 700) : ""
+      return text ? text.slice(0, 1000) : ""
     } catch (error) {
       const mapped = this.mapToHttpException(error)
       this.logger.error(

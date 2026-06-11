@@ -41,6 +41,8 @@ export type FalGenerateImageParams = {
   imageSize?: string
   numInferenceSteps?: number
   guidanceScale?: number
+  imageUrl?: string
+  strength?: number
 }
 
 @Injectable()
@@ -70,15 +72,22 @@ export class FalService {
     const mappedImageSize = this.mapImageSize(params.imageSize)
     const numInferenceSteps = this.resolveSteps(modelValue, params.numInferenceSteps)
 
+    const body: Record<string, unknown> = {
+      prompt: trimmedPrompt,
+      image_size: mappedImageSize,
+      num_inference_steps: numInferenceSteps,
+      guidance_scale: params.guidanceScale,
+      enable_safety_checker: true,
+    }
+
+    if (params.imageUrl) {
+      body.image_url = params.imageUrl
+      body.strength = params.strength ?? 0.6
+    }
+
     for (let attempt = 0; attempt <= RETRY_DELAYS_MS.length; attempt += 1) {
       try {
-        const response = await this.postToFal(modelConfig.endpoint, {
-          prompt: trimmedPrompt,
-          image_size: mappedImageSize,
-          num_inference_steps: numInferenceSteps,
-          guidance_scale: params.guidanceScale,
-          enable_safety_checker: true,
-        })
+        const response = await this.postToFal(modelConfig.endpoint, body)
         const imageUrl = response.images?.[0]?.url
 
         if (!imageUrl) {

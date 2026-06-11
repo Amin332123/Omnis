@@ -36,7 +36,7 @@ export function Pricing() {
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-7xl mx-auto">
           {loading ? (
             <div className="col-span-full flex justify-center py-12">
               <Loader2 className="h-6 w-6 animate-spin text-muted" />
@@ -52,7 +52,7 @@ export function Pricing() {
                 viewport={{ once: true, margin: "-100px" }}
                 transition={{ duration: 0.4, delay: index * 0.1 }}
               >
-                <PricingCard pack={pack} className={pack.popular ? "py-12" : ""} />
+                <PricingCard pack={pack} className={pack.popular ? "py-14" : ""} />
               </motion.div>
             ))
           )}

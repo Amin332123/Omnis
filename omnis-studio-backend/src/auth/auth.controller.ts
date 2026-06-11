@@ -14,7 +14,7 @@ import {
   MaxFileSizeValidator,
   FileTypeValidator,
 } from "@nestjs/common";
-import { Throttle, minutes, hours } from "@nestjs/throttler";
+import { Throttle, minutes, hours, ThrottlerGuard } from "@nestjs/throttler";
 import { FileInterceptor } from "@nestjs/platform-express";
 import {
   ApiBadRequestResponse,
@@ -54,6 +54,7 @@ type AuthenticatedUser = {
 };
 
 @ApiTags("auth")
+@UseGuards(ThrottlerGuard)
 @Controller("auth")
 export class AuthController {
   constructor(private readonly authService: AuthService) {}

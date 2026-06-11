@@ -1,5 +1,20 @@
+import type { Metadata } from "next"
 import { Navbar } from "@/components/landing/navbar"
 import { Footer } from "@/components/landing/footer"
+
+export const metadata: Metadata = {
+  title: "Changelog – Omnis Studio Updates & Releases",
+  description:
+    "Stay up to date with the latest Omnis Studio features, improvements, and bug fixes.",
+  alternates: {
+    canonical: "https://omnis-studio.com/changelog",
+  },
+  openGraph: {
+    title: "Changelog – Omnis Studio Updates",
+    description: "Latest updates and releases from Omnis Studio.",
+    url: "https://omnis-studio.com/changelog",
+  },
+}
 
 export default function ChangelogPage() {
   return (

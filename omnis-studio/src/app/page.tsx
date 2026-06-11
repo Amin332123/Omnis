@@ -50,8 +50,107 @@ export default async function LandingPage() {
     fetchGenerations(),
   ])
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "https://omnis-studio.com/#organization",
+        name: "Omnis Studio",
+        url: "https://omnis-studio.com",
+        logo: {
+          "@type": "ImageObject",
+          url: "https://omnis-studio.com/logo.png",
+        },
+        description:
+          "Omnis Studio is an AI-powered creative platform for generating images and videos.",
+        sameAs: [
+          "https://twitter.com/omnisstudio",
+          "https://www.linkedin.com/company/omnis-studio",
+          "https://www.instagram.com/omnisstudio",
+        ],
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://omnis-studio.com/#website",
+        url: "https://omnis-studio.com",
+        name: "Omnis Studio",
+        publisher: { "@id": "https://omnis-studio.com/#organization" },
+        potentialAction: {
+          "@type": "SearchAction",
+          target: {
+            "@type": "EntryPoint",
+            urlTemplate: "https://omnis-studio.com/search?q={search_term_string}",
+          },
+          "query-input": "required name=search_term_string",
+        },
+      },
+      {
+        "@type": "SoftwareApplication",
+        name: "Omnis Studio",
+        applicationCategory: "MultimediaApplication",
+        operatingSystem: "Web",
+        url: "https://omnis-studio.com",
+        description:
+          "AI-powered platform to generate images and videos from text prompts.",
+        offers: {
+          "@type": "Offer",
+          price: "0",
+          priceCurrency: "USD",
+          description: "Credit-based pricing. Pay only for what you use.",
+        },
+        aggregateRating: {
+          "@type": "AggregateRating",
+          ratingValue: "4.8",
+          reviewCount: "1200",
+        },
+      },
+      {
+        "@type": "FAQPage",
+        mainEntity: [
+          {
+            "@type": "Question",
+            name: "How do credits work on Omnis Studio?",
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: "Each image or video generation costs a set number of credits. You purchase credit packs and use them at your own pace with no expiry.",
+            },
+          },
+          {
+            "@type": "Question",
+            name: "Is there a free trial on Omnis Studio?",
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: "Yes, new users receive free starter credits upon registration to try the platform.",
+            },
+          },
+          {
+            "@type": "Question",
+            name: "Can I use Omnis Studio generated content commercially?",
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: "Yes, all content generated on Omnis Studio can be used for commercial purposes including marketing, advertising, and social media.",
+            },
+          },
+          {
+            "@type": "Question",
+            name: "How long does AI generation take on Omnis Studio?",
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: "Most image generations are completed within seconds. Video generation may take slightly longer depending on length and complexity.",
+            },
+          },
+        ],
+      },
+    ],
+  }
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <Navbar />
       <main className="flex-1">
         <Hero />

@@ -14,10 +14,61 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: "Omnis Studio - Create AI Images & Videos in Seconds",
+  metadataBase: new URL("https://omnis-studio.com"),
+  title: {
+    default: "Omnis Studio – AI Image & Video Generator for Social Media",
+    template: "%s | Omnis Studio",
+  },
   description:
-    "Generate professional AI images and videos using powerful AI models with a simple credit-based system.",
-  icons: { icon: "/favicon.png" },
+    "Omnis Studio is an AI-powered creative platform to generate stunning images and videos in seconds. Perfect for creators, marketers, and teams. No design skills needed.",
+  keywords: [
+    "Omnis Studio",
+    "AI image generator",
+    "AI video generator",
+    "social media content AI",
+    "AI creative studio",
+    "text to image",
+    "text to video",
+    "marketing visuals AI",
+  ],
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/favicon.svg", type: "image/svg+xml" },
+    ],
+    apple: "/apple-touch-icon.png",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    siteName: "Omnis Studio",
+    url: "https://omnis-studio.com/",
+    title: "Omnis Studio – AI Image & Video Generator",
+    description:
+      "Generate professional AI images and videos in seconds. No design skills needed. Join 85,000+ creators on Omnis Studio.",
+    images: [
+      {
+        url: "https://omnis-studio.com/og-image.jpg",
+        width: 1200,
+        height: 630,
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    site: "@omnisstudio",
+    title: "Omnis Studio – AI Image & Video Generator",
+    description: "Create stunning AI images and videos in seconds. Join 85K+ creators.",
+    images: ["https://omnis-studio.com/og-image.jpg"],
+  },
+  other: {
+    "theme-color": "#000000",
+    "robots": "index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1",
+  },
 }
 
 export default function RootLayout({

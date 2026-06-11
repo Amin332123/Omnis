@@ -56,8 +56,8 @@ export default async function LandingPage() {
       <main className="flex-1">
         <Hero />
         <Features />
-        <SocialProof initialGenerations={generationsResult} />
-        <Pricing initialPlans={plansResult} />
+        <SocialProof generations={generationsResult ?? []} />
+        <Pricing packs={plansResult ?? []} />
         <FAQ />
       </main>
       <Footer />

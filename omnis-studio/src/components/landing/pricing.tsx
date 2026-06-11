@@ -1,24 +1,10 @@
 "use client"
 
-import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
 import { PricingCard } from "@/components/shared/pricing-card"
-import { getPlans, mapPlanToCreditPack } from "@/lib/plans-api"
-import { Loader2 } from "lucide-react"
 import type { CreditPack } from "@/lib/types"
 
-export function Pricing({ initialPlans }: { initialPlans?: CreditPack[] | null }) {
-  const [packs, setPacks] = useState<CreditPack[]>(initialPlans ?? [])
-  const [loading, setLoading] = useState(!initialPlans)
-
-  useEffect(() => {
-    if (initialPlans) return
-    getPlans()
-      .then((plans) => setPacks(plans.map(mapPlanToCreditPack)))
-      .catch(() => {})
-      .finally(() => setLoading(false))
-  }, [initialPlans])
-
+export function Pricing({ packs }: { packs: CreditPack[] }) {
   return (
     <section id="pricing" className="py-24 sm:py-32 bg-secondary/50">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -38,13 +24,7 @@ export function Pricing({ initialPlans }: { initialPlans?: CreditPack[] | null }
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-7xl mx-auto">
-          {loading ? (
-            <div className="col-span-full flex justify-center py-12">
-              <Loader2 className="h-6 w-6 animate-spin text-muted" />
-            </div>
-          ) : packs.length === 0 ? (
-            <p className="col-span-full text-center text-muted">No credit packs available at this time.</p>
-          ) : (
+          {packs.length > 0 ? (
             packs.map((pack, index) => (
               <motion.div
                 key={pack.id}
@@ -56,6 +36,8 @@ export function Pricing({ initialPlans }: { initialPlans?: CreditPack[] | null }
                 <PricingCard pack={pack} className={pack.popular ? "py-14" : ""} />
               </motion.div>
             ))
+          ) : (
+            <p className="col-span-full text-center text-muted">No credit packs available at this time.</p>
           )}
         </div>
       </div>

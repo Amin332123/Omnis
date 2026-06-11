@@ -1,10 +1,10 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { motion } from "framer-motion"
-import { Image, Loader2 } from "lucide-react"
+import { Image } from "lucide-react"
 
-interface PublicGeneration {
+export interface PublicGeneration {
   id: string
   imageUrl: string
   prompt: string
@@ -49,8 +49,6 @@ const itemVariants = {
   },
 }
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") ?? ""
-
 function PublicGenerationCard({ generation }: { generation: PublicGeneration }) {
   const [hasImageError, setHasImageError] = useState(false)
 
@@ -87,26 +85,7 @@ function PublicGenerationCard({ generation }: { generation: PublicGeneration }) 
   )
 }
 
-export function SocialProof({ initialGenerations }: { initialGenerations?: PublicGeneration[] | null }) {
-  const [generations, setGenerations] = useState<PublicGeneration[]>(initialGenerations ?? [])
-  const [loading, setLoading] = useState(!initialGenerations)
-
-  useEffect(() => {
-    if (initialGenerations) return
-    const controller = new AbortController()
-    setLoading(true)
-
-    fetch(`${API_BASE}/generations/public`, { signal: controller.signal })
-      .then((res) => (res.ok ? res.json() : Promise.reject()))
-      .then((data) => {
-        if (Array.isArray(data)) setGenerations(data.slice(0, 6))
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false))
-
-    return () => controller.abort()
-  }, [initialGenerations])
-
+export function SocialProof({ generations }: { generations: PublicGeneration[] }) {
   return (
     <section id="social-proof" className="py-24 sm:py-32 bg-secondary/50">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -128,31 +107,21 @@ export function SocialProof({ initialGenerations }: { initialGenerations?: Publi
         <motion.div
           variants={containerVariants}
           initial={false}
-          animate="visible"
+          animate={generations.length > 0 ? "visible" : false}
           viewport={{ once: true, margin: "-100px" }}
           className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-20"
         >
-          {loading
-            ? Array.from({ length: 6 }).map((_, i) => (
+          {generations.length > 0
+            ? generations.map((gen) => <PublicGenerationCard key={gen.id} generation={gen} />)
+            : Array.from({ length: 6 }).map((_, i) => (
                 <motion.div
                   key={i}
                   variants={itemVariants}
                   className="aspect-square rounded-xl overflow-hidden bg-card border border-border flex items-center justify-center"
                 >
-                  <Loader2 className="h-6 w-6 animate-spin text-muted" />
+                  <Image className="h-8 w-8 text-muted" />
                 </motion.div>
-              ))
-            : generations.length > 0
-              ? generations.map((gen) => <PublicGenerationCard key={gen.id} generation={gen} />)
-              : Array.from({ length: 6 }).map((_, i) => (
-                  <motion.div
-                    key={i}
-                    variants={itemVariants}
-                    className="aspect-square rounded-xl overflow-hidden bg-card border border-border flex items-center justify-center"
-                  >
-                    <Image className="h-8 w-8 text-muted" />
-                  </motion.div>
-                ))}
+              ))}
         </motion.div>
 
         <motion.div

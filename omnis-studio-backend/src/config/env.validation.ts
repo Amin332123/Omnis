@@ -3,6 +3,7 @@ type EnvConfig = {
   OPENAI_API_KEY: string
   JWT_SECRET: string
   DATABASE_URL: string
+  FRONTEND_URL?: string
   RESEND_API_KEY?: string
   MAIL_FROM_ADDRESS?: string
   MAIL_FROM_NAME?: string
@@ -22,6 +23,7 @@ const REQUIRED_KEYS: Array<keyof EnvConfig> = [
 
 const OPTIONAL_NUMBER_KEYS: Array<keyof EnvConfig> = ["RATE_LIMIT_TTL", "RATE_LIMIT_LIMIT"]
 const OPTIONAL_STRING_KEYS: Array<keyof EnvConfig> = [
+  "FRONTEND_URL",
   "RESEND_API_KEY",
   "MAIL_FROM_ADDRESS",
   "MAIL_FROM_NAME",

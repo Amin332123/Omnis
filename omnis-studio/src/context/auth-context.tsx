@@ -10,6 +10,7 @@ import {
 } from "react"
 import {
   type AuthUserResponse,
+  type LoginResponse,
   login as loginRequest,
   register as registerRequest,
   resendVerification as resendVerificationRequest,
@@ -30,7 +31,7 @@ type AuthContextValue = {
   user: User | null
   token: string | null
   isLoading: boolean
-  login: (email: string, password: string) => Promise<void>
+  login: (email: string, password: string) => Promise<LoginResponse>
   register: (email: string, password: string) => Promise<void>
   sendVerificationCode: (email: string, password: string) => Promise<{ success: boolean; code?: string }>
   verifyAndRegister: (email: string, code: string) => Promise<void>
@@ -107,12 +108,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setStoredToken(response.accessToken)
     setToken(response.accessToken)
     await loadCurrentUser()
+    return response
   }, [loadCurrentUser])
 
   const register = useCallback(async (email: string, password: string) => {
     await registerRequest({ email, password })
-    await login(email, password)
-  }, [login])
+    const response = await loginRequest({ email, password })
+    setStoredToken(response.accessToken)
+    setToken(response.accessToken)
+    await loadCurrentUser()
+  }, [loadCurrentUser])
 
   const sendVerificationCode = useCallback(async (email: string, password: string) => {
     return await sendVerificationCodeRequest({ email, password })

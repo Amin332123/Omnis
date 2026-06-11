@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { motion } from "framer-motion"
 import { Mail, CheckCircle, Loader2, Sparkles, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -59,6 +59,23 @@ export function VerifyEmailContent() {
         })
     }
   }, [token, verifyEmailToken, router])
+
+  const autoSentRef = useRef(false)
+
+  useEffect(() => {
+    if (!isLoading && user && !user.isEmailVerified && !token && !autoSentRef.current) {
+      autoSentRef.current = true
+      setStep("sending")
+      resendVerification()
+        .then(() => {
+          setResendCooldown(60)
+          setStep("idle")
+        })
+        .catch(() => {
+          setStep("idle")
+        })
+    }
+  }, [isLoading, user, token, resendVerification])
 
   useEffect(() => {
     if (resendCooldown <= 0) return

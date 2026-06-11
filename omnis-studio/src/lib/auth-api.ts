@@ -14,6 +14,7 @@ export type AuthUserResponse = {
 
 export type LoginResponse = {
   accessToken: string
+  isEmailVerified: boolean
 }
 
 export type RegisterResponse = {

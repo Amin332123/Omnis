@@ -75,7 +75,7 @@ export default function RegisterPage() {
   const passwordStrength = passwordCriteria.filter((c) => c.met).length
 
   useEffect(() => {
-    if (!isLoading && user) {
+    if (!isLoading && user?.isEmailVerified) {
       router.replace("/dashboard")
     }
   }, [isLoading, user, router])

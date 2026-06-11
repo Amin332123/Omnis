@@ -349,20 +349,10 @@ export class AuthService {
       throw new UnauthorizedException("Invalid email or password");
     }
 
-    const adminEmail = this.configService.get<string>("ADMIN_EMAIL");
-    const isAdmin = !!adminEmail && user.email.toLowerCase() === adminEmail.toLowerCase();
-
-    if (!user.isEmailVerified && !isAdmin) {
-      throw new ForbiddenException({
-        message: "Please verify your email before logging in.",
-        resend_verification: true,
-      });
-    }
-
     const payload = { sub: user.id, email: user.email };
     const accessToken = await this.jwtService.signAsync(payload);
 
-    return { accessToken };
+    return { accessToken, isEmailVerified: user.isEmailVerified };
   }
 
   async updateNotifications(userId: string, prefs: { emailNotifications?: boolean; marketingEmails?: boolean }) {

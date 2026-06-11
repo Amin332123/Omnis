@@ -58,8 +58,10 @@ export default function LoginPage() {
   const { login, user, isLoading } = useAuth()
 
   useEffect(() => {
-    if (!isLoading && user) {
+    if (!isLoading && user?.isEmailVerified) {
       router.replace("/dashboard")
+    } else if (!isLoading && user && !user.isEmailVerified) {
+      router.replace("/verify-email")
     }
   }, [isLoading, user, router])
 
@@ -69,7 +71,11 @@ export default function LoginPage() {
     setIsSubmitting(true)
 
     try {
-      await login(formValues.email.trim(), formValues.password)
+      const result = await login(formValues.email.trim(), formValues.password)
+      if (!result.isEmailVerified) {
+        router.push("/verify-email")
+        return
+      }
       setStatusMessage({
         type: "success",
         message: "Login successful. Redirecting to your dashboard...",
@@ -82,11 +88,6 @@ export default function LoginPage() {
           type: "error",
           message: "Invalid email or password.",
         })
-        return
-      }
-
-      if (error instanceof ApiError && error.status === 403) {
-        router.push("/verify-email")
         return
       }
 

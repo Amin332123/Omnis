@@ -382,7 +382,7 @@ export class GenerationsService {
       model: modelKey,
       imageSize,
       imageUrl: referenceImageDataUrl,
-      strength: 0.85,
+      strength: 0.95,
     })
   }
 
@@ -416,6 +416,21 @@ export class GenerationsService {
     modelKey: string,
     referenceGuidance?: string,
   ) {
+    const wantsPreserve = referenceGuidance
+      ? this.detectIdentityPreservation(prompt)
+      : false
+
+    if (referenceGuidance && wantsPreserve) {
+      return [
+        `ABSOLUTELY CRITICAL: ${referenceGuidance}. THE PERSON'S FACE, GENDER, AGE, AND ETHNICITY MUST REMAIN EXACTLY AS IN THE REFERENCE IMAGE.`,
+        `User request: ${prompt}`,
+        dto.style ? STYLE_PROMPTS[dto.style] : undefined,
+        "intentional framing, no text artifacts, no watermark, no distorted hands, no deformed anatomy, no low-resolution blur",
+      ]
+        .filter(Boolean)
+        .join(", ")
+    }
+
     const stylePrompt = dto.style ? STYLE_PROMPTS[dto.style] : undefined
     const qualityPrompt = dto.quality ? QUALITY_PROMPTS[dto.quality] : QUALITY_PROMPTS.high
 
@@ -431,7 +446,7 @@ export class GenerationsService {
             : "fast professional generation, clear subject, strong visual readability"
 
     const preservationNote = referenceGuidance
-      ? `IMPORTANT - Reference image instructions: ${referenceGuidance}`
+      ? `IMPORTANT - Reference image: preserve the core subject's identity and key facial features. ${referenceGuidance}`
       : undefined
 
     return [
@@ -446,16 +461,27 @@ export class GenerationsService {
       .join(", ")
   }
 
+  private detectIdentityPreservation(prompt: string): boolean {
+    const lower = prompt.toLowerCase()
+    return (
+      /keep.*face|same.*face|my face|my photo|my picture|don't change.*face|do not change.*face|same.*person|same.*look|preserve.*face|preserve.*identity/i.test(lower) ||
+      /\bmy\b.*\bface\b|\bmy\b.*\bphoto\b|\bmy\b.*\bpicture\b|\bme\b.*\bsame\b/i.test(lower) ||
+      /keep|preserve|maintain|don't change|do not change|same|retain|stay/i.test(lower)
+    )
+  }
+
   private buildIdentityPreservationInstruction(prompt: string): string {
     const lower = prompt.toLowerCase()
-    const wantsKeep =
-      /keep|preserve|maintain|don't change|do not change|same|retain|stay|keep.*face|keep.*look/i.test(lower)
 
-    if (wantsKeep) {
-      return "CRITICAL: The user wants to preserve specific aspects from the reference image. Keep the original person's identity, facial structure, features, and expression intact. Only change what the prompt explicitly describes."
+    if (/my face|same.*face|keep.*face|face.*same|don't change.*face/i.test(lower)) {
+      return "EXACT IDENTITY LOCK: The person's face, gender, age, facial structure, skin tone, hair, and all identity markers MUST be IDENTICAL to the reference image. Do not alter any facial feature. Apply only the requested background and style changes around them."
     }
 
-    return "This is a reference image. Preserve the core subject's identity and key facial features unless the prompt explicitly says to change them. Maintain the original composition, lighting mood, and color palette as a foundation."
+    if (/keep|preserve|maintain|same|retain|stay/i.test(lower)) {
+      return "IDENTITY PRESERVATION: Keep the original person's identity, facial structure, features, and expression intact. Only change what the prompt explicitly describes."
+    }
+
+    return "This is a reference image. Preserve the core subject's identity and key facial features unless the prompt explicitly says to change them."
   }
 
   private async createReferenceGuidance(prompt: string, image: ReferenceImageUpload) {

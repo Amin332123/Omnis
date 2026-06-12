@@ -52,6 +52,8 @@ export const AnyNull = runtime.AnyNull
 
 export const ModelName = {
   Plan: 'Plan',
+  Transaction: 'Transaction',
+  PaddleWebhookEvent: 'PaddleWebhookEvent',
   VerificationCode: 'VerificationCode',
   EmailVerificationToken: 'EmailVerificationToken',
   User: 'User',
@@ -80,6 +82,7 @@ export const PlanScalarFieldEnum = {
   name: 'name',
   credits: 'credits',
   price: 'price',
+  paddlePriceId: 'paddlePriceId',
   features: 'features',
   popular: 'popular',
   active: 'active',
@@ -89,6 +92,33 @@ export const PlanScalarFieldEnum = {
 } as const
 
 export type PlanScalarFieldEnum = (typeof PlanScalarFieldEnum)[keyof typeof PlanScalarFieldEnum]
+
+
+export const TransactionScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  paddleTransactionId: 'paddleTransactionId',
+  amount: 'amount',
+  currency: 'currency',
+  creditsPurchased: 'creditsPurchased',
+  creditsBefore: 'creditsBefore',
+  creditsAfter: 'creditsAfter',
+  status: 'status',
+  details: 'details',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TransactionScalarFieldEnum = (typeof TransactionScalarFieldEnum)[keyof typeof TransactionScalarFieldEnum]
+
+
+export const PaddleWebhookEventScalarFieldEnum = {
+  evtId: 'evtId',
+  eventType: 'eventType',
+  processedAt: 'processedAt'
+} as const
+
+export type PaddleWebhookEventScalarFieldEnum = (typeof PaddleWebhookEventScalarFieldEnum)[keyof typeof PaddleWebhookEventScalarFieldEnum]
 
 
 export const VerificationCodeScalarFieldEnum = {
@@ -171,6 +201,14 @@ export const JsonNullValueInput = {
 } as const
 
 export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
+
+
+export const NullableJsonNullValueInput = {
+  DbNull: DbNull,
+  JsonNull: JsonNull
+} as const
+
+export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
 
 
 export const QueryMode = {

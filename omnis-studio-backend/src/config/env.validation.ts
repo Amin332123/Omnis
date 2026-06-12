@@ -3,6 +3,9 @@ type EnvConfig = {
   OPENAI_API_KEY: string
   JWT_SECRET: string
   DATABASE_URL: string
+  PADDLE_API_KEY: string
+  PADDLE_WEBHOOK_SECRET: string
+  PADDLE_ENVIRONMENT?: string
   FRONTEND_URL?: string
   RESEND_API_KEY?: string
   MAIL_FROM_ADDRESS?: string
@@ -19,6 +22,8 @@ const REQUIRED_KEYS: Array<keyof EnvConfig> = [
   "OPENAI_API_KEY",
   "JWT_SECRET",
   "DATABASE_URL",
+  "PADDLE_API_KEY",
+  "PADDLE_WEBHOOK_SECRET",
 ]
 
 const OPTIONAL_NUMBER_KEYS: Array<keyof EnvConfig> = ["RATE_LIMIT_TTL", "RATE_LIMIT_LIMIT"]

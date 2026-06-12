@@ -266,6 +266,7 @@ export type UserWhereInput = {
   deletedAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   jobs?: Prisma.GenerationJobListRelationFilter
   emailVerificationTokens?: Prisma.EmailVerificationTokenListRelationFilter
+  transactions?: Prisma.TransactionListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -282,6 +283,7 @@ export type UserOrderByWithRelationInput = {
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   jobs?: Prisma.GenerationJobOrderByRelationAggregateInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenOrderByRelationAggregateInput
+  transactions?: Prisma.TransactionOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -301,6 +303,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   deletedAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   jobs?: Prisma.GenerationJobListRelationFilter
   emailVerificationTokens?: Prisma.EmailVerificationTokenListRelationFilter
+  transactions?: Prisma.TransactionListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -353,6 +356,7 @@ export type UserCreateInput = {
   deletedAt?: Date | string | null
   jobs?: Prisma.GenerationJobCreateNestedManyWithoutUserInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedManyWithoutUserInput
+  transactions?: Prisma.TransactionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -369,6 +373,7 @@ export type UserUncheckedCreateInput = {
   deletedAt?: Date | string | null
   jobs?: Prisma.GenerationJobUncheckedCreateNestedManyWithoutUserInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
+  transactions?: Prisma.TransactionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -385,6 +390,7 @@ export type UserUpdateInput = {
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   jobs?: Prisma.GenerationJobUpdateManyWithoutUserNestedInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateManyWithoutUserNestedInput
+  transactions?: Prisma.TransactionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -401,6 +407,7 @@ export type UserUncheckedUpdateInput = {
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   jobs?: Prisma.GenerationJobUncheckedUpdateManyWithoutUserNestedInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
+  transactions?: Prisma.TransactionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -500,6 +507,20 @@ export type UserSumOrderByAggregateInput = {
   credits?: Prisma.SortOrder
 }
 
+export type UserCreateNestedOneWithoutTransactionsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutTransactionsInput, Prisma.UserUncheckedCreateWithoutTransactionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutTransactionsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutTransactionsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutTransactionsInput, Prisma.UserUncheckedCreateWithoutTransactionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutTransactionsInput
+  upsert?: Prisma.UserUpsertWithoutTransactionsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutTransactionsInput, Prisma.UserUpdateWithoutTransactionsInput>, Prisma.UserUncheckedUpdateWithoutTransactionsInput>
+}
+
 export type UserCreateNestedOneWithoutEmailVerificationTokensInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutEmailVerificationTokensInput, Prisma.UserUncheckedCreateWithoutEmailVerificationTokensInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutEmailVerificationTokensInput
@@ -512,10 +533,6 @@ export type UserUpdateOneRequiredWithoutEmailVerificationTokensNestedInput = {
   upsert?: Prisma.UserUpsertWithoutEmailVerificationTokensInput
   connect?: Prisma.UserWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutEmailVerificationTokensInput, Prisma.UserUpdateWithoutEmailVerificationTokensInput>, Prisma.UserUncheckedUpdateWithoutEmailVerificationTokensInput>
-}
-
-export type NullableStringFieldUpdateOperationsInput = {
-  set?: string | null
 }
 
 export type NullableDateTimeFieldUpdateOperationsInput = {
@@ -536,6 +553,86 @@ export type UserUpdateOneRequiredWithoutJobsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutJobsInput, Prisma.UserUpdateWithoutJobsInput>, Prisma.UserUncheckedUpdateWithoutJobsInput>
 }
 
+export type UserCreateWithoutTransactionsInput = {
+  id?: string
+  email: string
+  passwordHash: string
+  credits?: number
+  avatarUrl?: string | null
+  emailNotifications?: boolean
+  marketingEmails?: boolean
+  isEmailVerified?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  jobs?: Prisma.GenerationJobCreateNestedManyWithoutUserInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutTransactionsInput = {
+  id?: string
+  email: string
+  passwordHash: string
+  credits?: number
+  avatarUrl?: string | null
+  emailNotifications?: boolean
+  marketingEmails?: boolean
+  isEmailVerified?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  jobs?: Prisma.GenerationJobUncheckedCreateNestedManyWithoutUserInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutTransactionsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutTransactionsInput, Prisma.UserUncheckedCreateWithoutTransactionsInput>
+}
+
+export type UserUpsertWithoutTransactionsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutTransactionsInput, Prisma.UserUncheckedUpdateWithoutTransactionsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutTransactionsInput, Prisma.UserUncheckedCreateWithoutTransactionsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutTransactionsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutTransactionsInput, Prisma.UserUncheckedUpdateWithoutTransactionsInput>
+}
+
+export type UserUpdateWithoutTransactionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  credits?: Prisma.FloatFieldUpdateOperationsInput | number
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailNotifications?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  marketingEmails?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isEmailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  jobs?: Prisma.GenerationJobUpdateManyWithoutUserNestedInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutTransactionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  credits?: Prisma.FloatFieldUpdateOperationsInput | number
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailNotifications?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  marketingEmails?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isEmailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  jobs?: Prisma.GenerationJobUncheckedUpdateManyWithoutUserNestedInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
+}
+
 export type UserCreateWithoutEmailVerificationTokensInput = {
   id?: string
   email: string
@@ -549,6 +646,7 @@ export type UserCreateWithoutEmailVerificationTokensInput = {
   updatedAt?: Date | string
   deletedAt?: Date | string | null
   jobs?: Prisma.GenerationJobCreateNestedManyWithoutUserInput
+  transactions?: Prisma.TransactionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutEmailVerificationTokensInput = {
@@ -564,6 +662,7 @@ export type UserUncheckedCreateWithoutEmailVerificationTokensInput = {
   updatedAt?: Date | string
   deletedAt?: Date | string | null
   jobs?: Prisma.GenerationJobUncheckedCreateNestedManyWithoutUserInput
+  transactions?: Prisma.TransactionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutEmailVerificationTokensInput = {
@@ -595,6 +694,7 @@ export type UserUpdateWithoutEmailVerificationTokensInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   jobs?: Prisma.GenerationJobUpdateManyWithoutUserNestedInput
+  transactions?: Prisma.TransactionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutEmailVerificationTokensInput = {
@@ -610,6 +710,7 @@ export type UserUncheckedUpdateWithoutEmailVerificationTokensInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   jobs?: Prisma.GenerationJobUncheckedUpdateManyWithoutUserNestedInput
+  transactions?: Prisma.TransactionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutJobsInput = {
@@ -625,6 +726,7 @@ export type UserCreateWithoutJobsInput = {
   updatedAt?: Date | string
   deletedAt?: Date | string | null
   emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedManyWithoutUserInput
+  transactions?: Prisma.TransactionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutJobsInput = {
@@ -640,6 +742,7 @@ export type UserUncheckedCreateWithoutJobsInput = {
   updatedAt?: Date | string
   deletedAt?: Date | string | null
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
+  transactions?: Prisma.TransactionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutJobsInput = {
@@ -671,6 +774,7 @@ export type UserUpdateWithoutJobsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateManyWithoutUserNestedInput
+  transactions?: Prisma.TransactionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutJobsInput = {
@@ -686,6 +790,7 @@ export type UserUncheckedUpdateWithoutJobsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
+  transactions?: Prisma.TransactionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 
@@ -696,11 +801,13 @@ export type UserUncheckedUpdateWithoutJobsInput = {
 export type UserCountOutputType = {
   jobs: number
   emailVerificationTokens: number
+  transactions: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   jobs?: boolean | UserCountOutputTypeCountJobsArgs
   emailVerificationTokens?: boolean | UserCountOutputTypeCountEmailVerificationTokensArgs
+  transactions?: boolean | UserCountOutputTypeCountTransactionsArgs
 }
 
 /**
@@ -727,6 +834,13 @@ export type UserCountOutputTypeCountEmailVerificationTokensArgs<ExtArgs extends 
   where?: Prisma.EmailVerificationTokenWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountTransactionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.TransactionWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -742,6 +856,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   deletedAt?: boolean
   jobs?: boolean | Prisma.User$jobsArgs<ExtArgs>
   emailVerificationTokens?: boolean | Prisma.User$emailVerificationTokensArgs<ExtArgs>
+  transactions?: boolean | Prisma.User$transactionsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -791,6 +906,7 @@ export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = run
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   jobs?: boolean | Prisma.User$jobsArgs<ExtArgs>
   emailVerificationTokens?: boolean | Prisma.User$emailVerificationTokensArgs<ExtArgs>
+  transactions?: boolean | Prisma.User$transactionsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -801,6 +917,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   objects: {
     jobs: Prisma.$GenerationJobPayload<ExtArgs>[]
     emailVerificationTokens: Prisma.$EmailVerificationTokenPayload<ExtArgs>[]
+    transactions: Prisma.$TransactionPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1210,6 +1327,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   readonly [Symbol.toStringTag]: "PrismaPromise"
   jobs<T extends Prisma.User$jobsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$jobsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$GenerationJobPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   emailVerificationTokens<T extends Prisma.User$emailVerificationTokensArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$emailVerificationTokensArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EmailVerificationTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  transactions<T extends Prisma.User$transactionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$transactionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TransactionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1688,6 +1806,30 @@ export type User$emailVerificationTokensArgs<ExtArgs extends runtime.Types.Exten
   take?: number
   skip?: number
   distinct?: Prisma.EmailVerificationTokenScalarFieldEnum | Prisma.EmailVerificationTokenScalarFieldEnum[]
+}
+
+/**
+ * User.transactions
+ */
+export type User$transactionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Transaction
+   */
+  select?: Prisma.TransactionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Transaction
+   */
+  omit?: Prisma.TransactionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TransactionInclude<ExtArgs> | null
+  where?: Prisma.TransactionWhereInput
+  orderBy?: Prisma.TransactionOrderByWithRelationInput | Prisma.TransactionOrderByWithRelationInput[]
+  cursor?: Prisma.TransactionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.TransactionScalarFieldEnum | Prisma.TransactionScalarFieldEnum[]
 }
 
 /**

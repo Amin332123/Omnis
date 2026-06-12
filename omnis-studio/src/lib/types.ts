@@ -19,6 +19,7 @@ export interface CreditPack {
   credits: number
   popular?: boolean
   features?: string[]
+  paddlePriceId?: string
 }
 
 export interface Generation {

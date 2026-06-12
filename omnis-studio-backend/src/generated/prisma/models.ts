@@ -9,6 +9,8 @@
  * 🟢 You can import this file directly.
  */
 export type * from './models/Plan.js'
+export type * from './models/Transaction.js'
+export type * from './models/PaddleWebhookEvent.js'
 export type * from './models/VerificationCode.js'
 export type * from './models/EmailVerificationToken.js'
 export type * from './models/User.js'

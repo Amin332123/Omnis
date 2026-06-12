@@ -7,7 +7,7 @@ export class CreatePlanDto {
   @IsNotEmpty()
   name!: string;
 
-  @ApiProperty({ example: 100 })
+  @ApiProperty({ example: 300 })
   @IsInt()
   @Min(1)
   credits!: number;
@@ -17,7 +17,12 @@ export class CreatePlanDto {
   @Min(0)
   price!: number;
 
-  @ApiPropertyOptional({ example: ["100 credits to use anytime", "Credits never expire", "Generate images & videos"] })
+  @ApiPropertyOptional({ example: "pro_01kty756pz1wm7zg07c6spvsw5" })
+  @IsOptional()
+  @IsString()
+  paddlePriceId?: string;
+
+  @ApiPropertyOptional({ example: ["Credits to use anytime", "Credits never expire", "Generate images & videos"] })
   @IsOptional()
   @IsArray()
   @IsString({ each: true })

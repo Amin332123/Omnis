@@ -5,6 +5,7 @@ import { AuthModule } from "./auth/auth.module.js";
 import { MailModule } from "./mail/mail.module.js";
 import { GenerationsModule } from "./generations/generations.module.js";
 import { CreditsModule } from "./credits/credits.module.js";
+import { PaddleModule } from "./paddle/paddle.module.js";
 import { VideoModule } from "./video/video.module.js";
 import { AdminModule } from "./admin/admin.module.js";
 import { AppController } from "./app.controller.js";
@@ -31,6 +32,7 @@ import { validateEnvironment } from "./config/env.validation.js";
     AuthModule,
     MailModule,
     CreditsModule,
+    PaddleModule,
     GenerationsModule,
     VideoModule,
     AdminModule,

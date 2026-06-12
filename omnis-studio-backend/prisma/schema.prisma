@@ -10,18 +10,46 @@ datasource db {
  }
 
 model Plan {
-  id        String   @id @default(uuid()) @db.Uuid
-  name      String
-  credits   Int
-  price     Float
-  features  Json     @default("[]")
-  popular   Boolean  @default(false)
-  active    Boolean  @default(true)
-  sortOrder Int      @default(0) @map("sort_order")
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id             String   @id @default(uuid()) @db.Uuid
+  name           String
+  credits        Int
+  price          Float
+  paddlePriceId  String?  @unique @map("paddle_price_id")
+  features       Json     @default("[]")
+  popular        Boolean  @default(false)
+  active         Boolean  @default(true)
+  sortOrder      Int      @default(0) @map("sort_order")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
 
   @@map("plans")
+}
+
+model Transaction {
+  id                  String   @id @default(uuid()) @db.Uuid
+  userId              String   @db.Uuid @map("user_id")
+  paddleTransactionId String   @unique @map("paddle_transaction_id")
+  amount              Float
+  currency            String   @default("USD")
+  creditsPurchased    Int      @map("credits_purchased")
+  creditsBefore       Float    @map("credits_before")
+  creditsAfter        Float    @map("credits_after")
+  status              String   @default("completed")
+  details             Json?
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("transactions")
+}
+
+model PaddleWebhookEvent {
+  evtId       String   @id @map("evt_id")
+  eventType   String   @map("event_type")
+  processedAt DateTime @default(now()) @map("processed_at")
+
+  @@map("paddle_webhook_events")
 }
 
 model VerificationCode {
@@ -64,6 +92,7 @@ model User {
 
   jobs                  GenerationJob[]
   emailVerificationTokens EmailVerificationToken[]
+  transactions          Transaction[]
 
   @@map("users")
 }

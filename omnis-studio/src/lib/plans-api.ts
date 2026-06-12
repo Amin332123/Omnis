@@ -6,6 +6,7 @@ export type PlanResponse = {
   name: string
   credits: number
   price: number
+  paddlePriceId: string | null
   features: string[]
   popular: boolean
   active: boolean
@@ -61,4 +62,5 @@ export const mapPlanToCreditPack = (plan: PlanResponse): CreditPack => ({
   credits: plan.credits,
   popular: plan.popular,
   features: plan.features,
+  paddlePriceId: plan.paddlePriceId ?? undefined,
 })

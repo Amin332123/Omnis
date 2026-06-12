@@ -23,6 +23,16 @@ export * from './enums.js';
  */
 export type Plan = Prisma.PlanModel
 /**
+ * Model Transaction
+ * 
+ */
+export type Transaction = Prisma.TransactionModel
+/**
+ * Model PaddleWebhookEvent
+ * 
+ */
+export type PaddleWebhookEvent = Prisma.PaddleWebhookEventModel
+/**
  * Model VerificationCode
  * 
  */

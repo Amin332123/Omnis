@@ -43,6 +43,7 @@ export type PlanMinAggregateOutputType = {
   name: string | null
   credits: number | null
   price: number | null
+  paddlePriceId: string | null
   popular: boolean | null
   active: boolean | null
   sortOrder: number | null
@@ -55,6 +56,7 @@ export type PlanMaxAggregateOutputType = {
   name: string | null
   credits: number | null
   price: number | null
+  paddlePriceId: string | null
   popular: boolean | null
   active: boolean | null
   sortOrder: number | null
@@ -67,6 +69,7 @@ export type PlanCountAggregateOutputType = {
   name: number
   credits: number
   price: number
+  paddlePriceId: number
   features: number
   popular: number
   active: number
@@ -94,6 +97,7 @@ export type PlanMinAggregateInputType = {
   name?: true
   credits?: true
   price?: true
+  paddlePriceId?: true
   popular?: true
   active?: true
   sortOrder?: true
@@ -106,6 +110,7 @@ export type PlanMaxAggregateInputType = {
   name?: true
   credits?: true
   price?: true
+  paddlePriceId?: true
   popular?: true
   active?: true
   sortOrder?: true
@@ -118,6 +123,7 @@ export type PlanCountAggregateInputType = {
   name?: true
   credits?: true
   price?: true
+  paddlePriceId?: true
   features?: true
   popular?: true
   active?: true
@@ -218,6 +224,7 @@ export type PlanGroupByOutputType = {
   name: string
   credits: number
   price: number
+  paddlePriceId: string | null
   features: runtime.JsonValue
   popular: boolean
   active: boolean
@@ -254,6 +261,7 @@ export type PlanWhereInput = {
   name?: Prisma.StringFilter<"Plan"> | string
   credits?: Prisma.IntFilter<"Plan"> | number
   price?: Prisma.FloatFilter<"Plan"> | number
+  paddlePriceId?: Prisma.StringNullableFilter<"Plan"> | string | null
   features?: Prisma.JsonFilter<"Plan">
   popular?: Prisma.BoolFilter<"Plan"> | boolean
   active?: Prisma.BoolFilter<"Plan"> | boolean
@@ -267,6 +275,7 @@ export type PlanOrderByWithRelationInput = {
   name?: Prisma.SortOrder
   credits?: Prisma.SortOrder
   price?: Prisma.SortOrder
+  paddlePriceId?: Prisma.SortOrderInput | Prisma.SortOrder
   features?: Prisma.SortOrder
   popular?: Prisma.SortOrder
   active?: Prisma.SortOrder
@@ -277,6 +286,7 @@ export type PlanOrderByWithRelationInput = {
 
 export type PlanWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  paddlePriceId?: string
   AND?: Prisma.PlanWhereInput | Prisma.PlanWhereInput[]
   OR?: Prisma.PlanWhereInput[]
   NOT?: Prisma.PlanWhereInput | Prisma.PlanWhereInput[]
@@ -289,13 +299,14 @@ export type PlanWhereUniqueInput = Prisma.AtLeast<{
   sortOrder?: Prisma.IntFilter<"Plan"> | number
   createdAt?: Prisma.DateTimeFilter<"Plan"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Plan"> | Date | string
-}, "id">
+}, "id" | "paddlePriceId">
 
 export type PlanOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   credits?: Prisma.SortOrder
   price?: Prisma.SortOrder
+  paddlePriceId?: Prisma.SortOrderInput | Prisma.SortOrder
   features?: Prisma.SortOrder
   popular?: Prisma.SortOrder
   active?: Prisma.SortOrder
@@ -317,6 +328,7 @@ export type PlanScalarWhereWithAggregatesInput = {
   name?: Prisma.StringWithAggregatesFilter<"Plan"> | string
   credits?: Prisma.IntWithAggregatesFilter<"Plan"> | number
   price?: Prisma.FloatWithAggregatesFilter<"Plan"> | number
+  paddlePriceId?: Prisma.StringNullableWithAggregatesFilter<"Plan"> | string | null
   features?: Prisma.JsonWithAggregatesFilter<"Plan">
   popular?: Prisma.BoolWithAggregatesFilter<"Plan"> | boolean
   active?: Prisma.BoolWithAggregatesFilter<"Plan"> | boolean
@@ -330,6 +342,7 @@ export type PlanCreateInput = {
   name: string
   credits: number
   price: number
+  paddlePriceId?: string | null
   features?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   popular?: boolean
   active?: boolean
@@ -343,6 +356,7 @@ export type PlanUncheckedCreateInput = {
   name: string
   credits: number
   price: number
+  paddlePriceId?: string | null
   features?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   popular?: boolean
   active?: boolean
@@ -356,6 +370,7 @@ export type PlanUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   credits?: Prisma.IntFieldUpdateOperationsInput | number
   price?: Prisma.FloatFieldUpdateOperationsInput | number
+  paddlePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   features?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   popular?: Prisma.BoolFieldUpdateOperationsInput | boolean
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -369,6 +384,7 @@ export type PlanUncheckedUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   credits?: Prisma.IntFieldUpdateOperationsInput | number
   price?: Prisma.FloatFieldUpdateOperationsInput | number
+  paddlePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   features?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   popular?: Prisma.BoolFieldUpdateOperationsInput | boolean
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -382,6 +398,7 @@ export type PlanCreateManyInput = {
   name: string
   credits: number
   price: number
+  paddlePriceId?: string | null
   features?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   popular?: boolean
   active?: boolean
@@ -395,6 +412,7 @@ export type PlanUpdateManyMutationInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   credits?: Prisma.IntFieldUpdateOperationsInput | number
   price?: Prisma.FloatFieldUpdateOperationsInput | number
+  paddlePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   features?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   popular?: Prisma.BoolFieldUpdateOperationsInput | boolean
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -408,6 +426,7 @@ export type PlanUncheckedUpdateManyInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   credits?: Prisma.IntFieldUpdateOperationsInput | number
   price?: Prisma.FloatFieldUpdateOperationsInput | number
+  paddlePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   features?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   popular?: Prisma.BoolFieldUpdateOperationsInput | boolean
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -421,6 +440,7 @@ export type PlanCountOrderByAggregateInput = {
   name?: Prisma.SortOrder
   credits?: Prisma.SortOrder
   price?: Prisma.SortOrder
+  paddlePriceId?: Prisma.SortOrder
   features?: Prisma.SortOrder
   popular?: Prisma.SortOrder
   active?: Prisma.SortOrder
@@ -440,6 +460,7 @@ export type PlanMaxOrderByAggregateInput = {
   name?: Prisma.SortOrder
   credits?: Prisma.SortOrder
   price?: Prisma.SortOrder
+  paddlePriceId?: Prisma.SortOrder
   popular?: Prisma.SortOrder
   active?: Prisma.SortOrder
   sortOrder?: Prisma.SortOrder
@@ -452,6 +473,7 @@ export type PlanMinOrderByAggregateInput = {
   name?: Prisma.SortOrder
   credits?: Prisma.SortOrder
   price?: Prisma.SortOrder
+  paddlePriceId?: Prisma.SortOrder
   popular?: Prisma.SortOrder
   active?: Prisma.SortOrder
   sortOrder?: Prisma.SortOrder
@@ -485,6 +507,10 @@ export type FloatFieldUpdateOperationsInput = {
   divide?: number
 }
 
+export type NullableStringFieldUpdateOperationsInput = {
+  set?: string | null
+}
+
 export type BoolFieldUpdateOperationsInput = {
   set?: boolean
 }
@@ -500,6 +526,7 @@ export type PlanSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   name?: boolean
   credits?: boolean
   price?: boolean
+  paddlePriceId?: boolean
   features?: boolean
   popular?: boolean
   active?: boolean
@@ -513,6 +540,7 @@ export type PlanSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   name?: boolean
   credits?: boolean
   price?: boolean
+  paddlePriceId?: boolean
   features?: boolean
   popular?: boolean
   active?: boolean
@@ -526,6 +554,7 @@ export type PlanSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   name?: boolean
   credits?: boolean
   price?: boolean
+  paddlePriceId?: boolean
   features?: boolean
   popular?: boolean
   active?: boolean
@@ -539,6 +568,7 @@ export type PlanSelectScalar = {
   name?: boolean
   credits?: boolean
   price?: boolean
+  paddlePriceId?: boolean
   features?: boolean
   popular?: boolean
   active?: boolean
@@ -547,7 +577,7 @@ export type PlanSelectScalar = {
   updatedAt?: boolean
 }
 
-export type PlanOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "credits" | "price" | "features" | "popular" | "active" | "sortOrder" | "createdAt" | "updatedAt", ExtArgs["result"]["plan"]>
+export type PlanOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "credits" | "price" | "paddlePriceId" | "features" | "popular" | "active" | "sortOrder" | "createdAt" | "updatedAt", ExtArgs["result"]["plan"]>
 
 export type $PlanPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Plan"
@@ -557,6 +587,7 @@ export type $PlanPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     name: string
     credits: number
     price: number
+    paddlePriceId: string | null
     features: runtime.JsonValue
     popular: boolean
     active: boolean
@@ -990,6 +1021,7 @@ export interface PlanFieldRefs {
   readonly name: Prisma.FieldRef<"Plan", 'String'>
   readonly credits: Prisma.FieldRef<"Plan", 'Int'>
   readonly price: Prisma.FieldRef<"Plan", 'Float'>
+  readonly paddlePriceId: Prisma.FieldRef<"Plan", 'String'>
   readonly features: Prisma.FieldRef<"Plan", 'Json'>
   readonly popular: Prisma.FieldRef<"Plan", 'Boolean'>
   readonly active: Prisma.FieldRef<"Plan", 'Boolean'>

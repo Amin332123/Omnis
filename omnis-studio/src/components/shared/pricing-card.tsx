@@ -11,9 +11,10 @@ interface PricingCardProps {
   onSelect?: (packId: string) => void
   className?: string
   selected?: boolean
+  disabled?: boolean
 }
 
-export function PricingCard({ pack, onSelect, className, selected }: PricingCardProps) {
+export function PricingCard({ pack, onSelect, className, selected, disabled }: PricingCardProps) {
   return (
     <div className="relative">
       {pack.popular && (
@@ -89,8 +90,9 @@ export function PricingCard({ pack, onSelect, className, selected }: PricingCard
             className="w-full h-12 text-base"
             size="lg"
             onClick={() => onSelect?.(pack.id)}
+            disabled={disabled || !pack.paddlePriceId}
           >
-            Buy {pack.credits} Credits
+            {disabled ? "Processing..." : `Buy ${pack.credits} Credits`}
           </Button>
         </div>
       </motion.div>

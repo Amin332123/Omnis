@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { motion } from "framer-motion"
 import { Zap, Plus, ArrowUpRight, Image, Video, RefreshCw, CreditCard, Wallet, Calendar } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { PricingCard } from "@/components/shared/pricing-card"
 import { getPlans, mapPlanToCreditPack, type PlanResponse } from "@/lib/plans-api"
+import { initPaddle, openPaddleCheckout } from "@/lib/paddle"
+import { getCurrentCredits, getPurchaseTransactions, type TransactionResponse } from "@/lib/credits-api"
 import { cn } from "@/lib/utils"
 import { useAuth } from "@/context/auth-context"
 import { useGenerations } from "@/context/generations-context"
@@ -21,30 +23,106 @@ const transactionIcons: Record<string, React.ReactNode> = {
   refund: <RefreshCw className="h-4 w-4 text-warning" />,
 }
 
+const POLL_INTERVAL_MS = 2000
+const POLL_MAX_DURATION_MS = 60000
+
 export default function WalletPage() {
-  const { user } = useAuth()
+  const { user, setUserCredits } = useAuth()
   const { history, isLoadingHistory } = useGenerations()
   const [plans, setPlans] = useState<PlanResponse[]>([])
   const [isLoadingPlans, setIsLoadingPlans] = useState(true)
+  const [isPurchasing, setIsPurchasing] = useState(false)
+  const [purchaseTxns, setPurchaseTxns] = useState<TransactionResponse[]>([])
+  const [isLoadingTxns, setIsLoadingTxns] = useState(true)
+  const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const pollingStartRef = useRef<number>(0)
+
+  const stopPolling = useCallback(() => {
+    if (pollingRef.current) {
+      clearInterval(pollingRef.current)
+      pollingRef.current = null
+    }
+    setIsPurchasing(false)
+  }, [])
+
+  const startPolling = useCallback(() => {
+    pollingStartRef.current = Date.now()
+    setIsPurchasing(true)
+
+    pollingRef.current = setInterval(async () => {
+      if (Date.now() - pollingStartRef.current > POLL_MAX_DURATION_MS) {
+        stopPolling()
+        return
+      }
+
+      try {
+        const newCredits = await getCurrentCredits()
+        setUserCredits(newCredits)
+        stopPolling()
+      } catch {
+        // continue polling
+      }
+    }, POLL_INTERVAL_MS)
+  }, [setUserCredits, stopPolling])
+
+  useEffect(() => {
+    return () => {
+      if (pollingRef.current) clearInterval(pollingRef.current)
+    }
+  }, [])
+
+  const handlePurchase = useCallback((packId: string, paddlePriceId?: string) => {
+    if (!paddlePriceId || isPurchasing) return
+
+    initPaddle()
+    openPaddleCheckout({
+      items: [{ priceId: paddlePriceId, quantity: 1 }],
+      customData: { user_id: user?.id ?? "" },
+      settings: {
+        displayMode: "overlay",
+        theme: "dark",
+        successUrl: `${window.location.origin}/dashboard/billing?success=true`,
+      },
+    })
+
+    startPolling()
+  }, [user?.id, isPurchasing, startPolling])
 
   useEffect(() => {
     getPlans()
       .then(setPlans)
       .catch(() => {})
       .finally(() => setIsLoadingPlans(false))
+
+    getPurchaseTransactions()
+      .then(setPurchaseTxns)
+      .catch(() => {})
+      .finally(() => setIsLoadingTxns(false))
   }, [])
+
+  const allTransactions = [
+    ...purchaseTxns.map((txn) => ({
+      id: `purchase-${txn.id}`,
+      type: "purchase" as const,
+      credits: txn.creditsPurchased,
+      description: `Purchased ${txn.creditsPurchased} credits`,
+      date: txn.createdAt,
+      status: txn.status as "completed" | "pending" | "failed",
+    })),
+    ...history.map((gen) => ({
+      id: `gen-${gen.id}`,
+      type: "generation" as const,
+      credits: -gen.creditsUsed,
+      description: `${gen.type === "image" ? "Image" : "Video"} Generation - ${gen.prompt.slice(0, 48)}${gen.prompt.length > 48 ? "..." : ""}`,
+      date: gen.createdAt,
+      status: gen.status === "processing" ? "pending" as const : gen.status as "completed" | "failed",
+    })),
+  ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
   const creditsRemaining = user?.credits ?? 0
   const totalUsedCredits = history.reduce((sum, gen) => sum + gen.creditsUsed, 0)
   const totalPurchased = creditsRemaining + totalUsedCredits
   const usagePercent = totalPurchased > 0 ? (totalUsedCredits / totalPurchased) * 100 : 0
-  const transactions = history.map((gen) => ({
-    id: `gen-${gen.id}`,
-    type: "generation" as const,
-    credits: -gen.creditsUsed,
-    description: `${gen.type === "image" ? "Image" : "Video"} Generation - ${gen.prompt.slice(0, 48)}${gen.prompt.length > 48 ? "..." : ""}`,
-    date: gen.createdAt,
-    status: gen.status === "processing" ? "pending" : gen.status,
-  }))
+  const transactions = allTransactions
 
   return (
     <div className="space-y-8">
@@ -134,7 +212,14 @@ export default function WalletPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: 0.2 + index * 0.1 }}
               >
-                <PricingCard pack={mapPlanToCreditPack(plan)} />
+                <PricingCard
+                  pack={mapPlanToCreditPack(plan)}
+                  onSelect={(id) => {
+                    const p = plans.find((p) => p.id === id)
+                    handlePurchase(id, p?.paddlePriceId ?? undefined)
+                  }}
+                  disabled={isPurchasing}
+                />
               </motion.div>
             ))
           )}
@@ -150,7 +235,7 @@ export default function WalletPage() {
         </CardHeader>
         <CardContent>
           <div className="space-y-0">
-            {isLoadingHistory ? (
+            {(isLoadingHistory || isLoadingTxns) ? (
               <div className="space-y-4 py-4">
                 {Array.from({ length: 4 }).map((_, index) => (
                   <div key={index} className="flex items-center justify-between">

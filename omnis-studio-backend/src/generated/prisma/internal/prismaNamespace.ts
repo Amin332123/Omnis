@@ -385,6 +385,8 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 
 export const ModelName = {
   Plan: 'Plan',
+  Transaction: 'Transaction',
+  PaddleWebhookEvent: 'PaddleWebhookEvent',
   VerificationCode: 'VerificationCode',
   EmailVerificationToken: 'EmailVerificationToken',
   User: 'User',
@@ -405,7 +407,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "plan" | "verificationCode" | "emailVerificationToken" | "user" | "generationJob" | "preferredHomepageGeneration"
+    modelProps: "plan" | "transaction" | "paddleWebhookEvent" | "verificationCode" | "emailVerificationToken" | "user" | "generationJob" | "preferredHomepageGeneration"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -480,6 +482,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.PlanCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.PlanCountAggregateOutputType> | number
+        }
+      }
+    }
+    Transaction: {
+      payload: Prisma.$TransactionPayload<ExtArgs>
+      fields: Prisma.TransactionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.TransactionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TransactionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.TransactionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TransactionPayload>
+        }
+        findFirst: {
+          args: Prisma.TransactionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TransactionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.TransactionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TransactionPayload>
+        }
+        findMany: {
+          args: Prisma.TransactionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TransactionPayload>[]
+        }
+        create: {
+          args: Prisma.TransactionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TransactionPayload>
+        }
+        createMany: {
+          args: Prisma.TransactionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.TransactionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TransactionPayload>[]
+        }
+        delete: {
+          args: Prisma.TransactionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TransactionPayload>
+        }
+        update: {
+          args: Prisma.TransactionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TransactionPayload>
+        }
+        deleteMany: {
+          args: Prisma.TransactionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.TransactionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.TransactionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TransactionPayload>[]
+        }
+        upsert: {
+          args: Prisma.TransactionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TransactionPayload>
+        }
+        aggregate: {
+          args: Prisma.TransactionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTransaction>
+        }
+        groupBy: {
+          args: Prisma.TransactionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TransactionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.TransactionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TransactionCountAggregateOutputType> | number
+        }
+      }
+    }
+    PaddleWebhookEvent: {
+      payload: Prisma.$PaddleWebhookEventPayload<ExtArgs>
+      fields: Prisma.PaddleWebhookEventFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PaddleWebhookEventFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaddleWebhookEventPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PaddleWebhookEventFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaddleWebhookEventPayload>
+        }
+        findFirst: {
+          args: Prisma.PaddleWebhookEventFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaddleWebhookEventPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PaddleWebhookEventFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaddleWebhookEventPayload>
+        }
+        findMany: {
+          args: Prisma.PaddleWebhookEventFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaddleWebhookEventPayload>[]
+        }
+        create: {
+          args: Prisma.PaddleWebhookEventCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaddleWebhookEventPayload>
+        }
+        createMany: {
+          args: Prisma.PaddleWebhookEventCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.PaddleWebhookEventCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaddleWebhookEventPayload>[]
+        }
+        delete: {
+          args: Prisma.PaddleWebhookEventDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaddleWebhookEventPayload>
+        }
+        update: {
+          args: Prisma.PaddleWebhookEventUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaddleWebhookEventPayload>
+        }
+        deleteMany: {
+          args: Prisma.PaddleWebhookEventDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PaddleWebhookEventUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.PaddleWebhookEventUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaddleWebhookEventPayload>[]
+        }
+        upsert: {
+          args: Prisma.PaddleWebhookEventUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaddleWebhookEventPayload>
+        }
+        aggregate: {
+          args: Prisma.PaddleWebhookEventAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePaddleWebhookEvent>
+        }
+        groupBy: {
+          args: Prisma.PaddleWebhookEventGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PaddleWebhookEventGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PaddleWebhookEventCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PaddleWebhookEventCountAggregateOutputType> | number
         }
       }
     }
@@ -897,6 +1047,7 @@ export const PlanScalarFieldEnum = {
   name: 'name',
   credits: 'credits',
   price: 'price',
+  paddlePriceId: 'paddlePriceId',
   features: 'features',
   popular: 'popular',
   active: 'active',
@@ -906,6 +1057,33 @@ export const PlanScalarFieldEnum = {
 } as const
 
 export type PlanScalarFieldEnum = (typeof PlanScalarFieldEnum)[keyof typeof PlanScalarFieldEnum]
+
+
+export const TransactionScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  paddleTransactionId: 'paddleTransactionId',
+  amount: 'amount',
+  currency: 'currency',
+  creditsPurchased: 'creditsPurchased',
+  creditsBefore: 'creditsBefore',
+  creditsAfter: 'creditsAfter',
+  status: 'status',
+  details: 'details',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TransactionScalarFieldEnum = (typeof TransactionScalarFieldEnum)[keyof typeof TransactionScalarFieldEnum]
+
+
+export const PaddleWebhookEventScalarFieldEnum = {
+  evtId: 'evtId',
+  eventType: 'eventType',
+  processedAt: 'processedAt'
+} as const
+
+export type PaddleWebhookEventScalarFieldEnum = (typeof PaddleWebhookEventScalarFieldEnum)[keyof typeof PaddleWebhookEventScalarFieldEnum]
 
 
 export const VerificationCodeScalarFieldEnum = {
@@ -988,6 +1166,14 @@ export const JsonNullValueInput = {
 } as const
 
 export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
+
+
+export const NullableJsonNullValueInput = {
+  DbNull: DbNull,
+  JsonNull: JsonNull
+} as const
+
+export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
 
 
 export const QueryMode = {
@@ -1208,6 +1394,8 @@ export type PrismaClientOptions = ({
 }
 export type GlobalOmitConfig = {
   plan?: Prisma.PlanOmit
+  transaction?: Prisma.TransactionOmit
+  paddleWebhookEvent?: Prisma.PaddleWebhookEventOmit
   verificationCode?: Prisma.VerificationCodeOmit
   emailVerificationToken?: Prisma.EmailVerificationTokenOmit
   user?: Prisma.UserOmit

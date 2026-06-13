@@ -4,7 +4,10 @@ declare global {
       Checkout: {
         open: (options: PaddleCheckoutOptions) => Promise<PaddleEventData>
       }
-      Initialize: (options: { token: string; environment?: string }) => Promise<void>
+      Initialize: (options: { token: string }) => Promise<void>
+      Environment: {
+        set: (env: string) => void
+      }
     }
   }
 }
@@ -95,9 +98,9 @@ export async function initPaddle(): Promise<boolean> {
   }
 
   try {
+    window.Paddle!.Environment.set(PADDLE_ENVIRONMENT)
     await window.Paddle!.Initialize({
       token: PADDLE_CLIENT_TOKEN,
-      environment: PADDLE_ENVIRONMENT,
     })
     return true
   } catch (err) {

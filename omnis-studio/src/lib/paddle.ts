@@ -2,12 +2,9 @@ declare global {
   interface Window {
     Paddle: {
       Checkout: {
-        open: (options: PaddleCheckoutOptions) => void
+        open: (options: PaddleCheckoutOptions) => Promise<PaddleEventData>
       }
-      Environment: {
-        set: (environment: string) => void
-      }
-      Init: (options: { token: string }) => void
+      Init: (options: { token: string; environment?: string }) => Promise<void>
     }
   }
 }
@@ -22,22 +19,37 @@ export type PaddleCheckoutOptions = {
   }
 }
 
+type PaddleEventData = {
+  id: string
+  status: string
+  [key: string]: unknown
+}
+
 const PADDLE_CLIENT_TOKEN = process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN
 const PADDLE_ENVIRONMENT = process.env.NEXT_PUBLIC_PADDLE_ENVIRONMENT ?? "sandbox"
 
-let paddleInitialized = false
+let paddleInitPromise: Promise<void> | null = null
 
-export function initPaddle(): void {
-  if (typeof window === "undefined") return
-  if (!window.Paddle) return
-  if (paddleInitialized) return
+export function initPaddle(): Promise<void> {
+  if (typeof window === "undefined") return Promise.resolve()
+  if (!window.Paddle) {
+    console.error("Paddle.js not loaded")
+    return Promise.resolve()
+  }
+  if (paddleInitPromise) return paddleInitPromise
 
-  window.Paddle.Environment.set(PADDLE_ENVIRONMENT)
-  window.Paddle.Init({ token: PADDLE_CLIENT_TOKEN ?? "" })
-  paddleInitialized = true
+  paddleInitPromise = window.Paddle.Init({
+    token: PADDLE_CLIENT_TOKEN ?? "",
+    environment: PADDLE_ENVIRONMENT,
+  }).catch((err) => {
+    console.error("Paddle.Init failed", err)
+    paddleInitPromise = null
+  })
+
+  return paddleInitPromise
 }
 
-export function openPaddleCheckout(options: PaddleCheckoutOptions): void {
+export async function openPaddleCheckout(options: PaddleCheckoutOptions): Promise<void> {
   if (typeof window === "undefined") return
 
   if (!window.Paddle) {
@@ -45,5 +57,9 @@ export function openPaddleCheckout(options: PaddleCheckoutOptions): void {
     return
   }
 
-  window.Paddle.Checkout.open(options)
+  try {
+    await window.Paddle.Checkout.open(options)
+  } catch (err) {
+    console.error("Paddle checkout failed", err)
+  }
 }

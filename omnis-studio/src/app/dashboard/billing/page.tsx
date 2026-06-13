@@ -23,8 +23,8 @@ const transactionIcons: Record<string, React.ReactNode> = {
   refund: <RefreshCw className="h-4 w-4 text-warning" />,
 }
 
-const POLL_INTERVAL_MS = 2000
-const POLL_MAX_DURATION_MS = 60000
+const POLL_INTERVAL_MS = 5000
+const POLL_MAX_DURATION_MS = 120000
 
 export default function WalletPage() {
   const { user, setUserCredits } = useAuth()
@@ -111,8 +111,6 @@ export default function WalletPage() {
         setIsPurchasing(false)
         return
       }
-
-      startPolling()
     } catch (error) {
       console.error("Purchase error", error)
       setIsPurchasing(false)

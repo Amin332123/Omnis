@@ -1,6 +1,5 @@
 import type { Metadata } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
-import Script from "next/script"
 import { Providers } from "@/components/shared/providers"
 import "./globals.css"
 
@@ -83,12 +82,6 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      {process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN ? (
-        <Script
-          src="https://cdn.paddle.com/paddle/v2/paddle.js"
-          strategy="beforeInteractive"
-        />
-      ) : null}
       <body className="min-h-full flex flex-col">
         {process.env.NEXT_PUBLIC_API_URL ? (
           <link rel="preconnect" href={new URL(process.env.NEXT_PUBLIC_API_URL).origin} />

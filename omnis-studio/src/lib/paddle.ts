@@ -1,6 +1,6 @@
 declare global {
   interface Window {
-    Paddle: {
+    Paddle?: {
       Checkout: {
         open: (options: PaddleCheckoutOptions) => Promise<PaddleEventData>
       }
@@ -27,65 +27,91 @@ type PaddleEventData = {
 
 const PADDLE_CLIENT_TOKEN = process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN
 const PADDLE_ENVIRONMENT = process.env.NEXT_PUBLIC_PADDLE_ENVIRONMENT ?? "sandbox"
+const PADDLE_SCRIPT_URL = "https://cdn.paddle.com/paddle/v2/paddle.js"
 
-let paddleInitPromise: Promise<void> | null = null
+function loadPaddleScript(): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (typeof document === "undefined") {
+      reject(new Error("Not in browser"))
+      return
+    }
+    if (document.querySelector(`script[src="${PADDLE_SCRIPT_URL}"]`)) {
+      resolve()
+      return
+    }
+    const script = document.createElement("script")
+    script.src = PADDLE_SCRIPT_URL
+    script.async = true
+    script.onload = () => resolve()
+    script.onerror = () => reject(new Error("Failed to load Paddle.js"))
+    document.head.appendChild(script)
+  })
+}
 
-function waitForPaddle(): Promise<boolean> {
+function waitForPaddle(timeoutMs = 10000): Promise<boolean> {
   if (typeof window === "undefined") return Promise.resolve(false)
   if (window.Paddle) return Promise.resolve(true)
 
   return new Promise((resolve) => {
+    const start = Date.now()
     const check = () => {
       if (window.Paddle) {
         resolve(true)
         return
       }
+      if (Date.now() - start >= timeoutMs) {
+        resolve(false)
+        return
+      }
       setTimeout(check, 100)
     }
-    // Timeout after 10 seconds
-    setTimeout(() => resolve(false), 10000)
     check()
   })
 }
 
 export async function initPaddle(): Promise<boolean> {
   if (typeof window === "undefined") return false
-  if (paddleInitPromise) {
-    await paddleInitPromise
-    return true
+  if (!PADDLE_CLIENT_TOKEN) {
+    console.error("Paddle client token not configured")
+    return false
+  }
+
+  const scriptLoaded = await loadPaddleScript().then(() => true).catch(() => false)
+  if (!scriptLoaded) {
+    console.error("Failed to load Paddle.js")
+    return false
   }
 
   const loaded = await waitForPaddle()
   if (!loaded) {
-    console.error("Paddle.js failed to load")
+    console.error("Paddle.js loaded but Paddle global not found")
     return false
   }
 
-  paddleInitPromise = window.Paddle.Init({
-    token: PADDLE_CLIENT_TOKEN ?? "",
-    environment: PADDLE_ENVIRONMENT,
-  }).then(() => {
-    // success
-  }).catch((err) => {
+  try {
+    await window.Paddle.Init({
+      token: PADDLE_CLIENT_TOKEN,
+      environment: PADDLE_ENVIRONMENT,
+    })
+    return true
+  } catch (err) {
     console.error("Paddle.Init failed", err)
-    paddleInitPromise = null
-  })
-
-  await paddleInitPromise
-  return true
+    return false
+  }
 }
 
-export async function openPaddleCheckout(options: PaddleCheckoutOptions): Promise<void> {
-  if (typeof window === "undefined") return
-
+export async function openPaddleCheckout(options: PaddleCheckoutOptions): Promise<boolean> {
+  if (typeof window === "undefined") return false
   if (!window.Paddle) {
-    console.error("Paddle.js not loaded")
-    return
+    console.error("Paddle.js not initialized")
+    return false
   }
 
   try {
     await window.Paddle.Checkout.open(options)
+    return true
   } catch (err) {
     console.error("Paddle checkout failed", err)
+    return false
   }
 }

@@ -76,24 +76,35 @@ export default function WalletPage() {
 
     setIsPurchasing(true)
 
-    const initialized = await initPaddle()
-    if (!initialized) {
-      console.error("Paddle failed to initialize")
+    try {
+      const initialized = await initPaddle()
+      if (!initialized) {
+        console.error("Paddle failed to initialize")
+        setIsPurchasing(false)
+        return
+      }
+
+      const opened = await openPaddleCheckout({
+        items: [{ priceId: paddlePriceId, quantity: 1 }],
+        customData: { user_id: user?.id ?? "" },
+        settings: {
+          displayMode: "overlay",
+          theme: "dark",
+          successUrl: `${window.location.origin}/dashboard/billing?success=true`,
+        },
+      })
+
+      if (!opened) {
+        console.error("Paddle checkout failed to open")
+        setIsPurchasing(false)
+        return
+      }
+
+      startPolling()
+    } catch (error) {
+      console.error("Purchase error", error)
       setIsPurchasing(false)
-      return
     }
-
-    await openPaddleCheckout({
-      items: [{ priceId: paddlePriceId, quantity: 1 }],
-      customData: { user_id: user?.id ?? "" },
-      settings: {
-        displayMode: "overlay",
-        theme: "dark",
-        successUrl: `${window.location.origin}/dashboard/billing?success=true`,
-      },
-    })
-
-    startPolling()
   }, [user?.id, isPurchasing, startPolling])
 
   useEffect(() => {

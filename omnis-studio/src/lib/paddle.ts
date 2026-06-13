@@ -89,7 +89,7 @@ export async function initPaddle(): Promise<boolean> {
   }
 
   try {
-    await window.Paddle.Init({
+    await window.Paddle!.Init({
       token: PADDLE_CLIENT_TOKEN,
       environment: PADDLE_ENVIRONMENT,
     })
@@ -108,7 +108,7 @@ export async function openPaddleCheckout(options: PaddleCheckoutOptions): Promis
   }
 
   try {
-    await window.Paddle.Checkout.open(options)
+    await window.Paddle!.Checkout.open(options)
     return true
   } catch (err) {
     console.error("Paddle checkout failed", err)

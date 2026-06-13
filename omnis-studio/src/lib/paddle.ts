@@ -17,6 +17,12 @@ export type PaddleCheckoutOptions = {
     theme?: "light" | "dark"
     successUrl?: string
   }
+  eventCallback?: (event: PaddleEvent) => void
+}
+
+type PaddleEvent = {
+  name: string
+  data?: Record<string, unknown>
 }
 
 type PaddleEventData = {
@@ -108,7 +114,15 @@ export async function openPaddleCheckout(options: PaddleCheckoutOptions): Promis
   }
 
   try {
-    await window.Paddle!.Checkout.open(options)
+    await window.Paddle!.Checkout.open({
+      ...options,
+      eventCallback: (event: { name: string; data?: Record<string, unknown> }) => {
+        console.log("[Paddle event]", event.name, event.data)
+        if (event.name === "checkout.failed" || event.name === "checkout.error") {
+          console.error("[Paddle error]", event.data)
+        }
+      },
+    })
     return true
   } catch (err) {
     console.error("Paddle checkout failed", err)

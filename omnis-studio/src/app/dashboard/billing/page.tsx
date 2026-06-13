@@ -76,22 +76,22 @@ export default function WalletPage() {
 
     setIsPurchasing(true)
 
-    try {
-      await initPaddle()
-      await openPaddleCheckout({
-        items: [{ priceId: paddlePriceId, quantity: 1 }],
-        customData: { user_id: user?.id ?? "" },
-        settings: {
-          displayMode: "overlay",
-          theme: "dark",
-          successUrl: `${window.location.origin}/dashboard/billing?success=true`,
-        },
-      })
-    } catch (err) {
-      console.error("Purchase failed", err)
+    const initialized = await initPaddle()
+    if (!initialized) {
+      console.error("Paddle failed to initialize")
       setIsPurchasing(false)
       return
     }
+
+    await openPaddleCheckout({
+      items: [{ priceId: paddlePriceId, quantity: 1 }],
+      customData: { user_id: user?.id ?? "" },
+      settings: {
+        displayMode: "overlay",
+        theme: "dark",
+        successUrl: `${window.location.origin}/dashboard/billing?success=true`,
+      },
+    })
 
     startPolling()
   }, [user?.id, isPurchasing, startPolling])

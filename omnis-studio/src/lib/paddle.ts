@@ -30,23 +30,49 @@ const PADDLE_ENVIRONMENT = process.env.NEXT_PUBLIC_PADDLE_ENVIRONMENT ?? "sandbo
 
 let paddleInitPromise: Promise<void> | null = null
 
-export function initPaddle(): Promise<void> {
-  if (typeof window === "undefined") return Promise.resolve()
-  if (!window.Paddle) {
-    console.error("Paddle.js not loaded")
-    return Promise.resolve()
+function waitForPaddle(): Promise<boolean> {
+  if (typeof window === "undefined") return Promise.resolve(false)
+  if (window.Paddle) return Promise.resolve(true)
+
+  return new Promise((resolve) => {
+    const check = () => {
+      if (window.Paddle) {
+        resolve(true)
+        return
+      }
+      setTimeout(check, 100)
+    }
+    // Timeout after 10 seconds
+    setTimeout(() => resolve(false), 10000)
+    check()
+  })
+}
+
+export async function initPaddle(): Promise<boolean> {
+  if (typeof window === "undefined") return false
+  if (paddleInitPromise) {
+    await paddleInitPromise
+    return true
   }
-  if (paddleInitPromise) return paddleInitPromise
+
+  const loaded = await waitForPaddle()
+  if (!loaded) {
+    console.error("Paddle.js failed to load")
+    return false
+  }
 
   paddleInitPromise = window.Paddle.Init({
     token: PADDLE_CLIENT_TOKEN ?? "",
     environment: PADDLE_ENVIRONMENT,
+  }).then(() => {
+    // success
   }).catch((err) => {
     console.error("Paddle.Init failed", err)
     paddleInitPromise = null
   })
 
-  return paddleInitPromise
+  await paddleInitPromise
+  return true
 }
 
 export async function openPaddleCheckout(options: PaddleCheckoutOptions): Promise<void> {

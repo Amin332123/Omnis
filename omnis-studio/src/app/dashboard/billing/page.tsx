@@ -48,6 +48,7 @@ export default function WalletPage() {
   const startPolling = useCallback(() => {
     pollingStartRef.current = Date.now()
     setIsPurchasing(true)
+    let initialCredits: number | null = null
 
     pollingRef.current = setInterval(async () => {
       if (Date.now() - pollingStartRef.current > POLL_MAX_DURATION_MS) {
@@ -57,8 +58,12 @@ export default function WalletPage() {
 
       try {
         const newCredits = await getCurrentCredits()
-        setUserCredits(newCredits)
-        stopPolling()
+        if (initialCredits === null) {
+          initialCredits = newCredits
+        } else if (newCredits !== initialCredits) {
+          setUserCredits(newCredits)
+          stopPolling()
+        }
       } catch {
         // continue polling
       }

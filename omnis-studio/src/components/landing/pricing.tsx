@@ -1,10 +1,17 @@
 "use client"
 
 import { motion } from "framer-motion"
+import { useRouter } from "next/navigation"
 import { PricingCard } from "@/components/shared/pricing-card"
 import type { CreditPack } from "@/lib/types"
 
 export function Pricing({ packs }: { packs: CreditPack[] }) {
+  const router = useRouter()
+
+  const handleSelect = () => {
+    router.push("/dashboard/billing")
+  }
+
   return (
     <section id="pricing" className="py-24 sm:py-32 bg-secondary/50">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -33,7 +40,7 @@ export function Pricing({ packs }: { packs: CreditPack[] }) {
                 viewport={{ once: true, margin: "-100px" }}
                 transition={{ duration: 0.4, delay: index * 0.1 }}
               >
-                <PricingCard pack={pack} className={pack.popular ? "py-14" : ""} />
+                <PricingCard pack={pack} className={pack.popular ? "py-14" : ""} onSelect={handleSelect} />
               </motion.div>
             ))
           ) : (

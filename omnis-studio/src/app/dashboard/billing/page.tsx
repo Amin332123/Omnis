@@ -66,10 +66,17 @@ export default function WalletPage() {
   }, [setUserCredits, stopPolling])
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    if (params.get("success") === "true") {
+      console.log("[billing] success redirect detected, polling for credits")
+      startPolling()
+      window.history.replaceState({}, "", window.location.pathname)
+    }
+
     return () => {
       if (pollingRef.current) clearInterval(pollingRef.current)
     }
-  }, [])
+  }, [startPolling])
 
   const handlePurchase = useCallback(async (packId: string, paddlePriceId?: string) => {
     if (!paddlePriceId || isPurchasing) return

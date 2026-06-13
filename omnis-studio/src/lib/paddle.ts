@@ -25,12 +25,16 @@ export type PaddleCheckoutOptions = {
 const PADDLE_CLIENT_TOKEN = process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN
 const PADDLE_ENVIRONMENT = process.env.NEXT_PUBLIC_PADDLE_ENVIRONMENT ?? "sandbox"
 
+let paddleInitialized = false
+
 export function initPaddle(): void {
   if (typeof window === "undefined") return
   if (!window.Paddle) return
+  if (paddleInitialized) return
 
   window.Paddle.Environment.set(PADDLE_ENVIRONMENT)
   window.Paddle.Init({ token: PADDLE_CLIENT_TOKEN ?? "" })
+  paddleInitialized = true
 }
 
 export function openPaddleCheckout(options: PaddleCheckoutOptions): void {

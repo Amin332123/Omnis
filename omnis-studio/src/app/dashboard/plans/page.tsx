@@ -17,7 +17,7 @@ import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import Swal from "sweetalert2"
 
-const emptyForm = { name: "", credits: 0, price: 0, features: [""], popular: false, active: true }
+const emptyForm = { name: "", credits: 0, price: 0, paddlePriceId: undefined as string | undefined, features: [""], popular: false, active: true }
 
 export default function PlansPage() {
   const router = useRouter()
@@ -65,6 +65,7 @@ export default function PlansPage() {
       name: plan.name,
       credits: plan.credits,
       price: plan.price,
+      paddlePriceId: plan.paddlePriceId ?? undefined,
       features: plan.features.length ? [...plan.features] : [""],
       popular: plan.popular,
       active: plan.active,
@@ -94,10 +95,10 @@ export default function PlansPage() {
     setIsSaving(true)
     try {
       if (editingPlan) {
-        await updatePlan(editingPlan.id, { ...form, features })
+        await updatePlan(editingPlan.id, { ...form, paddlePriceId: form.paddlePriceId || undefined, features })
         showSuccessToast("Plan updated")
       } else {
-        await createPlan({ ...form, features })
+        await createPlan({ ...form, paddlePriceId: form.paddlePriceId || undefined, features })
         showSuccessToast("Plan created")
       }
       setDialogOpen(false)
@@ -330,7 +331,7 @@ export default function PlansPage() {
               <Input id="plan-name" value={form.name} onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))} placeholder="e.g. Starter Pack" />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="plan-credits">Credits</Label>
                 <Input id="plan-credits" type="number" min={1} value={form.credits} onChange={(e) => setForm((p) => ({ ...p, credits: Number(e.target.value) }))} />
@@ -338,6 +339,10 @@ export default function PlansPage() {
               <div className="space-y-2">
                 <Label htmlFor="plan-price">Price ($)</Label>
                 <Input id="plan-price" type="number" min={0} step={0.01} value={form.price} onChange={(e) => setForm((p) => ({ ...p, price: Number(e.target.value) }))} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="plan-price-id">Paddle Price ID</Label>
+                <Input id="plan-price-id" value={form.paddlePriceId ?? ""} onChange={(e) => setForm((p) => ({ ...p, paddlePriceId: e.target.value || undefined }))} placeholder="pro_..." />
               </div>
             </div>
 

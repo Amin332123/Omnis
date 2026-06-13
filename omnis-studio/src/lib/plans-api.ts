@@ -23,6 +23,7 @@ export const createPlan = (data: {
   name: string
   credits: number
   price: number
+  paddlePriceId?: string | null
   features?: string[]
   popular?: boolean
   active?: boolean
@@ -39,6 +40,7 @@ export const updatePlan = (
     name?: string
     credits?: number
     price?: number
+    paddlePriceId?: string | null
     features?: string[]
     popular?: boolean
     active?: boolean

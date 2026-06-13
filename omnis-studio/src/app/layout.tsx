@@ -83,6 +83,8 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        <link rel="preconnect" href="https://cdn.paddle.com" />
+        <link rel="preload" href="https://cdn.paddle.com/paddle/v2/paddle.js" as="script" />
         {process.env.NEXT_PUBLIC_API_URL ? (
           <link rel="preconnect" href={new URL(process.env.NEXT_PUBLIC_API_URL).origin} />
         ) : null}

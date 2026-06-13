@@ -23,9 +23,22 @@ export const metadata: Metadata = {
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") ?? ""
 
+const FETCH_TIMEOUT_MS = 8_000
+
+async function fetchWithTimeout(url: string, options?: RequestInit): Promise<Response> {
+  const controller = new AbortController()
+  const id = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS)
+  try {
+    const res = await fetch(url, { ...options, signal: controller.signal })
+    return res
+  } finally {
+    clearTimeout(id)
+  }
+}
+
 async function fetchPlans(): Promise<CreditPack[] | null> {
   try {
-    const res = await fetch(`${API_BASE}/plans`, {
+    const res = await fetchWithTimeout(`${API_BASE}/plans`, {
       next: { revalidate: 60 },
     })
     if (!res.ok) return null

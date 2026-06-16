@@ -4,11 +4,19 @@ import { NestFactory } from "@nestjs/core";
 import { NestExpressApplication } from "@nestjs/platform-express";
 import { AppModule } from "./app.module.js";
 import { join } from "path";
+import bodyParser from "body-parser";
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
-    rawBody: true,
+    bodyParser: false,
   });
+
+  app.use(bodyParser.json({
+    verify: (req: any, _res, buf) => {
+      req.rawBody = buf;
+    },
+  }));
+  app.use(bodyParser.urlencoded({ extended: true }));
 
   app.use(
     helmet({

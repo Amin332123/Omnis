@@ -1,8 +1,8 @@
-import { Controller, Post, HttpCode, HttpStatus, Headers, Req, BadRequestException, Logger } from "@nestjs/common"
+import { Controller, Get, Post, HttpCode, HttpStatus, Headers, Req, BadRequestException, Logger } from "@nestjs/common"
 import { ApiExcludeEndpoint, ApiTags } from "@nestjs/swagger"
 import type { Request } from "express"
 import { PaddleService } from "./paddle.service.js"
-import { EventName, TransactionCompletedEvent, TransactionPaidEvent, TransactionCanceledEvent } from "@paddle/paddle-node-sdk"
+import { EventName, TransactionCompletedEvent, TransactionPaidEvent, TransactionCanceledEvent, TransactionRevisedEvent } from "@paddle/paddle-node-sdk"
 
 @ApiTags("paddle")
 @Controller("webhooks")
@@ -10,6 +10,13 @@ export class PaddleController {
   private readonly logger = new Logger(PaddleController.name)
 
   constructor(private readonly paddleService: PaddleService) {}
+
+  @Get("paddle")
+  @HttpCode(HttpStatus.OK)
+  @ApiExcludeEndpoint()
+  healthCheck(): { status: string; message: string } {
+    return { status: "ok", message: "Paddle webhook endpoint is reachable" }
+  }
 
   @Post("paddle")
   @HttpCode(HttpStatus.OK)
@@ -21,6 +28,7 @@ export class PaddleController {
     const rawBody = (req as unknown as { rawBody: Buffer }).rawBody
 
     if (!rawBody || !signature) {
+      this.logger.warn(`Missing rawBody=${!!rawBody} signature=${!!signature}`)
       throw new BadRequestException("Missing request body or Paddle-Signature header")
     }
 
@@ -30,14 +38,22 @@ export class PaddleController {
     try {
       event = await this.paddleService.unmarshal(rawBodyString, signature)
     } catch (error) {
-      this.logger.warn("Invalid webhook signature", error)
+      this.logger.warn(`Invalid webhook signature for event`, error instanceof Error ? error.message : error)
       throw new BadRequestException("Invalid webhook signature")
     }
 
-    if (event.eventType === EventName.TransactionCompleted || event.eventType === EventName.TransactionPaid) {
+    this.logger.log(`Processing Paddle event: ${event.eventType}`)
+
+    if (
+      event.eventType === EventName.TransactionCompleted
+      || event.eventType === EventName.TransactionPaid
+      || event.eventType === EventName.TransactionBilled
+    ) {
       await this.paddleService.processTransactionCompleted(event as TransactionCompletedEvent)
     } else if (event.eventType === EventName.TransactionCanceled) {
       await this.paddleService.processTransactionCanceled(event as TransactionCanceledEvent)
+    } else if (event.eventType === EventName.TransactionRevised) {
+      await this.paddleService.processTransactionRevised(event as TransactionRevisedEvent)
     } else {
       this.logger.log(`Unhandled Paddle event type: ${event.eventType}`)
     }

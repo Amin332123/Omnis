@@ -158,9 +158,64 @@ export class PaddleService {
       this.logger.log(`Transaction ${transactionId} marked as canceled`)
     }
   }
+
+  async processTransactionRevised(event: TransactionRevisedEventType): Promise<void> {
+    const eventId = event.eventId
+    const eventType = event.eventType
+    const notification = event.data
+    const transactionId = notification.id
+
+    if (!(await this.markEventProcessed(eventId, eventType))) return
+
+    const existingTxn = await this.prisma.transaction.findUnique({
+      where: { paddleTransactionId: transactionId },
+    })
+
+    if (!existingTxn) {
+      this.logger.warn(`No existing transaction found for revised transaction ${transactionId}`)
+      return
+    }
+
+    const txnStatus = notification.status as string
+    const isRefunded = txnStatus === "refunded" || txnStatus === "partially_refunded"
+    if (!isRefunded || existingTxn.status === "refunded") return
+
+    const userId = existingTxn.userId
+    const creditsPurchased = existingTxn.creditsPurchased
+
+    const user = await this.prisma.user.findUnique({ where: { id: userId } })
+    if (!user) {
+      this.logger.warn(`User ${userId} not found for refund of transaction ${transactionId}`)
+      return
+    }
+
+    const creditsBefore = user.credits
+    const creditsAfter = Math.max(0, creditsBefore - creditsPurchased)
+
+    await this.prisma.$transaction(async (tx) => {
+      await tx.user.update({
+        where: { id: userId },
+        data: { credits: creditsAfter },
+      })
+      await tx.transaction.update({
+        where: { id: existingTxn.id },
+        data: { status: "refunded" },
+      })
+    })
+
+    this.logger.log(
+      `Refunded ${creditsPurchased} credits from user ${userId} (${creditsBefore} → ${creditsAfter}) for transaction ${transactionId}`,
+    )
+  }
 }
 
 type TransactionPaidEventType = {
+  eventId: string
+  eventType: string
+  data: TransactionNotification
+}
+
+type TransactionRevisedEventType = {
   eventId: string
   eventType: string
   data: TransactionNotification

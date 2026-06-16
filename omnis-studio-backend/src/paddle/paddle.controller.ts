@@ -2,6 +2,7 @@ import { Controller, Get, Post, HttpCode, HttpStatus, Headers, Req, BadRequestEx
 import { ApiExcludeEndpoint, ApiTags } from "@nestjs/swagger"
 import type { Request } from "express"
 import { PaddleService } from "./paddle.service.js"
+import { PrismaService } from "../prisma/prisma.service.js"
 import { EventName, TransactionCompletedEvent, TransactionPaidEvent, TransactionCanceledEvent, TransactionRevisedEvent } from "@paddle/paddle-node-sdk"
 
 @ApiTags("paddle")
@@ -9,7 +10,10 @@ import { EventName, TransactionCompletedEvent, TransactionPaidEvent, Transaction
 export class PaddleController {
   private readonly logger = new Logger(PaddleController.name)
 
-  constructor(private readonly paddleService: PaddleService) {}
+  constructor(
+    private readonly paddleService: PaddleService,
+    private readonly prisma: PrismaService,
+  ) {}
 
   @Get("paddle")
   @HttpCode(HttpStatus.OK)
@@ -59,5 +63,23 @@ export class PaddleController {
     }
 
     return { success: true }
+  }
+
+  @Get("paddle/events")
+  @ApiExcludeEndpoint()
+  async recentEvents(): Promise<unknown[]> {
+    return this.prisma.paddleWebhookEvent.findMany({
+      orderBy: { processedAt: "desc" },
+      take: 10,
+    })
+  }
+
+  @Get("paddle/transactions")
+  @ApiExcludeEndpoint()
+  async recentTransactions(): Promise<unknown[]> {
+    return this.prisma.transaction.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 10,
+    })
   }
 }

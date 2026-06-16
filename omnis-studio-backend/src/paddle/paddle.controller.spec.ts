@@ -3,6 +3,7 @@ import { BadRequestException } from "@nestjs/common"
 import type { Request } from "express"
 import { PaddleController } from "./paddle.controller.js"
 import { PaddleService } from "./paddle.service.js"
+import { PrismaService } from "../prisma/prisma.service.js"
 import { EventName } from "@paddle/paddle-node-sdk"
 
 function createMockPaddleService() {
@@ -11,6 +12,17 @@ function createMockPaddleService() {
     processTransactionCompleted: vi.fn(),
     processTransactionCanceled: vi.fn(),
   } as unknown as PaddleService
+}
+
+function createMockPrisma() {
+  return {
+    paddleWebhookEvent: {
+      findMany: vi.fn().mockResolvedValue([]),
+    },
+    transaction: {
+      findMany: vi.fn().mockResolvedValue([]),
+    },
+  } as unknown as PrismaService
 }
 
 function createRequest(rawBody: string | null, signature: string | null): Request {
@@ -25,11 +37,13 @@ function createRequest(rawBody: string | null, signature: string | null): Reques
 describe("PaddleController", () => {
   let controller: PaddleController
   let service: PaddleService
+  let prisma: PrismaService
 
   beforeEach(() => {
     vi.clearAllMocks()
     service = createMockPaddleService()
-    controller = new PaddleController(service)
+    prisma = createMockPrisma()
+    controller = new PaddleController(service, prisma)
   })
 
   it("should throw BadRequestException if rawBody is missing", async () => {

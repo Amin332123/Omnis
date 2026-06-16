@@ -1,4 +1,4 @@
-export const SIGNUP_BONUS_CREDITS = 1
+export const SIGNUP_BONUS_CREDITS = 5
 export const LOW_CREDIT_WARNING_THRESHOLD = 1
 
 export const QUALITY_MULTIPLIERS = {

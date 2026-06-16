@@ -5,7 +5,7 @@ type EnvConfig = {
   DATABASE_URL: string
   PADDLE_API_KEY: string
   PADDLE_WEBHOOK_SECRET: string
-  PADDLE_ENVIRONMENT?: string
+  PADDLE_ENVIRONMENT?: "sandbox" | "production"
   FRONTEND_URL?: string
   RESEND_API_KEY?: string
   MAIL_FROM_ADDRESS?: string
@@ -34,6 +34,7 @@ const OPTIONAL_STRING_KEYS: Array<keyof EnvConfig> = [
   "MAIL_FROM_NAME",
   "ADMIN_EMAIL",
   "ADMIN_PASSWORD",
+  "PADDLE_ENVIRONMENT",
 ]
 
 export const validateEnvironment = (config: Record<string, unknown>) => {

@@ -1,7 +1,7 @@
 import { FAL_FLUX_MODELS, type FalFluxModelValue } from "../fal/fal.models.js"
 import { OPENAI_IMAGE_MODELS, type OpenAIImageModel } from "../openai/openai.models.js"
 
-export const SIGNUP_BONUS_CREDITS = 10
+export const SIGNUP_BONUS_CREDITS = 5
 export const LOW_CREDIT_WARNING_THRESHOLD = 1
 
 export const QUALITY_MULTIPLIERS = {

@@ -7,8 +7,9 @@ import {
   Environment,
   TransactionCompletedEvent,
   TransactionNotification,
-  TransactionItemNotification,
 } from "@paddle/paddle-node-sdk"
+
+type PlanInfo = { name: string; credits: number; price: number }
 
 @Injectable()
 export class PaddleService {
@@ -36,39 +37,52 @@ export class PaddleService {
     return this.getClient().webhooks.unmarshal(rawBody, secretKey, signature)
   }
 
+  private async findPlanByPriceId(priceId: string): Promise<PlanInfo | null> {
+    const dbPlan = await this.prisma.plan.findFirst({
+      where: { paddlePriceId: priceId, active: true },
+      select: { name: true, credits: true, price: true },
+    })
+    if (dbPlan) {
+      return { name: dbPlan.name, credits: dbPlan.credits, price: dbPlan.price }
+    }
+    return PADDLE_PRODUCT_MAP[priceId] ?? null
+  }
+
+  private async markEventProcessed(evtId: string, eventType: string): Promise<boolean> {
+    const existing = await this.prisma.paddleWebhookEvent.findUnique({
+      where: { evtId },
+    })
+    if (existing) {
+      this.logger.log(`Webhook event ${evtId} already processed, skipping`)
+      return false
+    }
+    await this.prisma.paddleWebhookEvent.create({
+      data: { evtId, eventType },
+    })
+    return true
+  }
+
   async processTransactionCompleted(event: TransactionCompletedEvent): Promise<void> {
     const eventId = event.eventId
     const eventType = event.eventType
-
-    const existing = await this.prisma.paddleWebhookEvent.findUnique({
-      where: { evtId: eventId },
-    })
-    if (existing) {
-      this.logger.log(`Webhook event ${eventId} already processed, skipping`)
-      return
-    }
-
     const transaction: TransactionNotification = event.data
     const transactionId = transaction.id
+
+    if (!(await this.markEventProcessed(eventId, eventType))) return
+
     const customData = transaction.customData
     const userId = customData?.user_id as string | undefined
     const items = transaction.items
     const currency = transaction.currencyCode
 
     if (!transactionId || !userId) {
-      this.logger.warn(`Transaction missing user_id in custom_data`)
-      await this.prisma.paddleWebhookEvent.create({
-        data: { evtId: eventId, eventType },
-      })
+      this.logger.warn(`Transaction ${transactionId} missing user_id in custom_data`)
       return
     }
 
     const user = await this.prisma.user.findUnique({ where: { id: userId } })
     if (!user) {
       this.logger.warn(`User ${userId} not found for transaction ${transactionId}`)
-      await this.prisma.paddleWebhookEvent.create({
-        data: { evtId: eventId, eventType },
-      })
       return
     }
 
@@ -83,7 +97,7 @@ export class PaddleService {
     for (const item of items) {
       const price = item.price
       if (price) {
-        const product = PADDLE_PRODUCT_MAP[price.id]
+        const product = await this.findPlanByPriceId(price.id)
         if (product) {
           creditsPurchased += product.credits * item.quantity
         }
@@ -92,9 +106,6 @@ export class PaddleService {
 
     if (creditsPurchased <= 0) {
       this.logger.warn(`No valid Paddle product found for transaction ${transactionId}`)
-      await this.prisma.paddleWebhookEvent.create({
-        data: { evtId: eventId, eventType },
-      })
       return
     }
 
@@ -102,10 +113,6 @@ export class PaddleService {
     const creditsAfter = creditsBefore + creditsPurchased
 
     await this.prisma.$transaction(async (tx) => {
-      await tx.paddleWebhookEvent.create({
-        data: { evtId: eventId, eventType },
-      })
-
       await tx.user.update({
         where: { id: userId },
         data: { credits: creditsAfter },
@@ -130,4 +137,31 @@ export class PaddleService {
       `Credited ${creditsPurchased} credits to user ${userId} (${creditsBefore} → ${creditsAfter}) for transaction ${transactionId}`,
     )
   }
+
+  async processTransactionCanceled(event: TransactionPaidEventType): Promise<void> {
+    const eventId = event.eventId
+    const eventType = event.eventType
+    const notification = event.data
+    const transactionId = notification.id
+
+    if (!(await this.markEventProcessed(eventId, eventType))) return
+
+    const existingTxn = await this.prisma.transaction.findUnique({
+      where: { paddleTransactionId: transactionId },
+    })
+
+    if (existingTxn && existingTxn.status !== "canceled") {
+      await this.prisma.transaction.update({
+        where: { id: existingTxn.id },
+        data: { status: "canceled" },
+      })
+      this.logger.log(`Transaction ${transactionId} marked as canceled`)
+    }
+  }
+}
+
+type TransactionPaidEventType = {
+  eventId: string
+  eventType: string
+  data: TransactionNotification
 }

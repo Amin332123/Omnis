@@ -2,7 +2,7 @@ import { Controller, Post, HttpCode, HttpStatus, Headers, Req, BadRequestExcepti
 import { ApiExcludeEndpoint, ApiTags } from "@nestjs/swagger"
 import type { Request } from "express"
 import { PaddleService } from "./paddle.service.js"
-import { EventName, TransactionCompletedEvent } from "@paddle/paddle-node-sdk"
+import { EventName, TransactionCompletedEvent, TransactionPaidEvent, TransactionCanceledEvent } from "@paddle/paddle-node-sdk"
 
 @ApiTags("paddle")
 @Controller("webhooks")
@@ -34,8 +34,12 @@ export class PaddleController {
       throw new BadRequestException("Invalid webhook signature")
     }
 
-    if (event.eventType === EventName.TransactionCompleted) {
+    if (event.eventType === EventName.TransactionCompleted || event.eventType === EventName.TransactionPaid) {
       await this.paddleService.processTransactionCompleted(event as TransactionCompletedEvent)
+    } else if (event.eventType === EventName.TransactionCanceled) {
+      await this.paddleService.processTransactionCanceled(event as TransactionCanceledEvent)
+    } else {
+      this.logger.log(`Unhandled Paddle event type: ${event.eventType}`)
     }
 
     return { success: true }

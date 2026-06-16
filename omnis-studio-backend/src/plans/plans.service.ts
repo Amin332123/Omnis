@@ -8,7 +8,7 @@ const DEFAULT_PLANS = [
     name: "Starter Pack",
     credits: 300,
     price: 29,
-    paddlePriceId: "pro_01kty756pz1wm7zg07c6spvsw5",
+    paddlePriceId: "pri_01kty77r9kb063d99s3pdkdkyc",
     features: [
       "300 credits to use anytime",
       "Credits never expire",
@@ -22,7 +22,7 @@ const DEFAULT_PLANS = [
     name: "Pro Pack",
     credits: 1000,
     price: 79,
-    paddlePriceId: "pro_01kty78aq24p6ed4r6znchr9t7",
+    paddlePriceId: "pri_01kty7krpry1p3m9sft9styf0c",
     features: [
       "1000 credits to use anytime",
       "Credits never expire",
@@ -37,7 +37,7 @@ const DEFAULT_PLANS = [
     name: "Pro Max Pack",
     credits: 2000,
     price: 149,
-    paddlePriceId: "pro_01kty7m4ykc0hzrc2q1m1bcc81",
+    paddlePriceId: "pri_01kty7mw8jtfbx5e2dyqbxarrc",
     features: [
       "2000 credits to use anytime",
       "Credits never expire",

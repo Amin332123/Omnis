@@ -6,3 +6,10 @@ export const PADDLE_PRODUCT_MAP: Record<string, { name: string; credits: number;
 
 export const CREDITS_PER_PURCHASE_MIN = 1
 export const CREDITS_PER_PURCHASE_MAX = 100000
+
+export const PADDLE_EVENTS = {
+  TRANSACTION_COMPLETED: "transaction.completed",
+  TRANSACTION_REFUNDED: "transaction.refunded",
+  TRANSACTION_CANCELED: "transaction.canceled",
+  TRANSACTION_PAID: "transaction.paid",
+} as const

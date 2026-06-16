@@ -23,6 +23,7 @@ import { SendVerificationCodeDto } from "./dto/send-verification-code.dto.js";
 import { VerifyCodeDto } from "./dto/verify-code.dto.js";
 import { RequestPasswordResetDto } from "./dto/request-password-reset.dto.js";
 import { ResetPasswordDto } from "./dto/reset-password.dto.js";
+import { SIGNUP_BONUS_CREDITS } from "../credits/credits.config.js";
 
 @Injectable()
 export class AuthService {
@@ -44,6 +45,7 @@ export class AuthService {
         data: {
           email: registerDto.email,
           passwordHash,
+          credits: SIGNUP_BONUS_CREDITS,
         },
         select: {
           id: true,
@@ -141,7 +143,7 @@ export class AuthService {
           data: {
             passwordHash: record.passwordHash,
             deletedAt: null,
-            credits: 5,
+            credits: SIGNUP_BONUS_CREDITS,
             emailNotifications: true,
             marketingEmails: false,
             avatarUrl: null,

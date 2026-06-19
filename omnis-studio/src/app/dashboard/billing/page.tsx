@@ -85,6 +85,11 @@ export default function WalletPage() {
 
   const handlePurchase = useCallback(async (packId: string, paddlePriceId?: string) => {
     if (!paddlePriceId || isPurchasing) return
+    if (!user?.id) {
+      console.error("Cannot purchase: user not authenticated")
+      setIsPurchasing(false)
+      return
+    }
 
     setIsPurchasing(true)
 
@@ -98,7 +103,7 @@ export default function WalletPage() {
 
       const opened = await openPaddleCheckout({
         items: [{ priceId: paddlePriceId, quantity: 1 }],
-        customData: { user_id: user?.id ?? "" },
+        customData: { user_id: user.id },
         settings: {
           displayMode: "overlay",
           theme: "dark",

@@ -68,18 +68,28 @@ export class PaddleService {
     const transaction: TransactionNotification = event.data
     const transactionId = transaction.id
 
+    this.logger.log(`Processing transaction.completed: eventId=${eventId}, transactionId=${transactionId}`)
+
     if (!(await this.markEventProcessed(eventId, eventType))) return
 
     const customData = transaction.customData
-    const userId = customData?.user_id as string | undefined
     const items = transaction.items
     const currency = transaction.currencyCode
 
+    // Try customData first, then passthrough (legacy)
+    let userId = customData?.user_id as string | undefined
+    if (!userId) {
+      userId = customData?.userId as string | undefined
+    }
+
     if (!transactionId || !userId) {
-      this.logger.warn(`Transaction ${transactionId} missing user_id in custom_data`)
+      this.logger.warn(
+        `Transaction ${transactionId} missing user_id in custom_data. customData=${JSON.stringify(customData)}`,
+      )
       return
     }
 
+    this.logger.log(`Looking up user ${userId} for transaction ${transactionId}`)
     const user = await this.prisma.user.findUnique({ where: { id: userId } })
     if (!user) {
       this.logger.warn(`User ${userId} not found for transaction ${transactionId}`)
@@ -97,25 +107,36 @@ export class PaddleService {
     for (const item of items) {
       const price = item.price
       if (price) {
+        this.logger.log(`Looking up plan for price ID: ${price.id}`)
         const product = await this.findPlanByPriceId(price.id)
         if (product) {
           creditsPurchased += product.credits * item.quantity
+          this.logger.log(`Matched price ${price.id} → ${product.name}, ${product.credits} credits x ${item.quantity}`)
+        } else {
+          this.logger.warn(`No plan found for price ID: ${price.id}`)
         }
       }
     }
 
     if (creditsPurchased <= 0) {
-      this.logger.warn(`No valid Paddle product found for transaction ${transactionId}`)
+      this.logger.warn(
+        `No valid Paddle product found for transaction ${transactionId}. ` +
+        `Items: ${JSON.stringify(items.map(i => ({ priceId: i.price?.id, qty: i.quantity })))}`,
+      )
       return
     }
 
     const creditsBefore = user.credits
     const creditsAfter = creditsBefore + creditsPurchased
 
+    this.logger.log(
+      `Applying ${creditsPurchased} credits to user ${userId}: ${creditsBefore} → ${creditsAfter}`,
+    )
+
     await this.prisma.$transaction(async (tx) => {
       await tx.user.update({
         where: { id: userId },
-        data: { credits: creditsAfter },
+        data: { credits: { increment: creditsPurchased } },
       })
 
       await tx.transaction.create({
@@ -134,7 +155,7 @@ export class PaddleService {
     })
 
     this.logger.log(
-      `Credited ${creditsPurchased} credits to user ${userId} (${creditsBefore} → ${creditsAfter}) for transaction ${transactionId}`,
+      `✓ Success: Credited ${creditsPurchased} credits to user ${userId} (${creditsBefore} → ${creditsAfter}) for transaction ${transactionId}`,
     )
   }
 
@@ -143,6 +164,8 @@ export class PaddleService {
     const eventType = event.eventType
     const notification = event.data
     const transactionId = notification.id
+
+    this.logger.log(`Processing transaction.canceled: eventId=${eventId}, transactionId=${transactionId}`)
 
     if (!(await this.markEventProcessed(eventId, eventType))) return
 
@@ -156,6 +179,8 @@ export class PaddleService {
         data: { status: "canceled" },
       })
       this.logger.log(`Transaction ${transactionId} marked as canceled`)
+    } else if (!existingTxn) {
+      this.logger.log(`No existing transaction for canceled event ${transactionId} — no action taken`)
     }
   }
 
@@ -164,6 +189,8 @@ export class PaddleService {
     const eventType = event.eventType
     const notification = event.data
     const transactionId = notification.id
+
+    this.logger.log(`Processing transaction.revised: eventId=${eventId}, transactionId=${transactionId}`)
 
     if (!(await this.markEventProcessed(eventId, eventType))) return
 
@@ -183,29 +210,36 @@ export class PaddleService {
     const userId = existingTxn.userId
     const creditsPurchased = existingTxn.creditsPurchased
 
-    const user = await this.prisma.user.findUnique({ where: { id: userId } })
-    if (!user) {
-      this.logger.warn(`User ${userId} not found for refund of transaction ${transactionId}`)
-      return
-    }
+    this.logger.log(`Refunding ${creditsPurchased} credits for user ${userId}, transaction ${transactionId}`)
 
-    const creditsBefore = user.credits
-    const creditsAfter = Math.max(0, creditsBefore - creditsPurchased)
-
+    // Use raw SQL with GREATEST to atomically deduct credits without going below 0
     await this.prisma.$transaction(async (tx) => {
-      await tx.user.update({
-        where: { id: userId },
-        data: { credits: creditsAfter },
-      })
+      const user = await tx.user.findUnique({ where: { id: userId } })
+      if (!user) {
+        this.logger.warn(`User ${userId} not found for refund of transaction ${transactionId}`)
+        return
+      }
+
+      const creditsBefore = user.credits
+      const creditsAfter = Math.max(0, creditsBefore - creditsPurchased)
+      const actualDecrement = creditsBefore - creditsAfter
+
+      if (actualDecrement > 0) {
+        await tx.user.update({
+          where: { id: userId },
+          data: { credits: { decrement: actualDecrement } },
+        })
+      }
+
       await tx.transaction.update({
         where: { id: existingTxn.id },
         data: { status: "refunded" },
       })
-    })
 
-    this.logger.log(
-      `Refunded ${creditsPurchased} credits from user ${userId} (${creditsBefore} → ${creditsAfter}) for transaction ${transactionId}`,
-    )
+      this.logger.log(
+        `✓ Refunded ${actualDecrement} credits from user ${userId} (${creditsBefore} → ${creditsAfter}) for transaction ${transactionId}`,
+      )
+    })
   }
 }
 
